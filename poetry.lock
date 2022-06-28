@@ -1,0 +1,93 @@
+[[package]]
+name = "aioify"
+version = "0.4.1"
+description = "Make every Python function async/await"
+category = "main"
+optional = false
+python-versions = ">=3.6,<3.10"
+
+[package.dependencies]
+module-wrapper = ">=0.3.0,<0.4.0"
+
+[[package]]
+name = "module-wrapper"
+version = "0.3.2"
+description = "Module wrapper Python library"
+category = "main"
+optional = false
+python-versions = ">=3.6,<3.10"
+
+[package.dependencies]
+stdlib_list = ">=0.8.0,<0.9.0"
+
+[[package]]
+name = "python-dateutil"
+version = "2.8.2"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
+name = "python-dateutils"
+version = "3.0.2"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
+name = "six"
+version = "1.16.0"
+description = "Python 2 and 3 compatibility utilities"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
+name = "stdlib-list"
+version = "0.8.0"
+description = "A list of Python Standard Libraries (2.6-7, 3.2-9)."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+develop = ["sphinx"]
+
+[metadata]
+lock-version = "1.1"
+python-versions = ">=3.8,<3.10"
+content-hash = "1269fae454b55d17486a082e7de5613d2b1d96d8573d7ad12904e97172564201"
+
+[metadata.files]
+aioify = [
+    {file = "aioify-0.4.1-py3-none-any.whl", hash = "sha256:fd862a4a936608336d36e81aeca6219414cef1a7a383831c6d8863102ff3b323"},
+    {file = "aioify-0.4.1.tar.gz", hash = "sha256:433b869662108649f8c263694c12cb93bc80d2d9ba715f17b0f03017aa56c721"},
+]
+module-wrapper = [
+    {file = "module-wrapper-0.3.2.tar.gz", hash = "sha256:6fc9873df249cfc251b33328b35a3ec3c96d2d424576bc6a3ec5e8fd161bb418"},
+    {file = "module_wrapper-0.3.2-py3-none-any.whl", hash = "sha256:28b52a8407123e727eb846bc9b12d1503988644374ff7b92ac328e874db9a054"},
+]
+python-dateutil = [
+    {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
+    {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
+]
+python-dateutils = [
+    {file = "python-dateutils-3.0.2.tar.gz", hash = "sha256:f3e8cd6465c18ed6ea14892bfa1ce55c399fb21f7575d6a8e4e48ec08f233c6b"},
+    {file = "python_dateutils-3.0.2-py2.py3-none-any.whl", hash = "sha256:0f2b67b73285d154b206b9ab17b1f9d9da332e0fbded9af0f0b1081c6c58e035"},
+]
+six = [
+    {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+    {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+stdlib-list = [
+    {file = "stdlib-list-0.8.0.tar.gz", hash = "sha256:a1e503719720d71e2ed70ed809b385c60cd3fb555ba7ec046b96360d30b16d9f"},
+    {file = "stdlib_list-0.8.0-py3-none-any.whl", hash = "sha256:2ae0712a55b68f3fbbc9e58d6fa1b646a062188f49745b495f94d3310a9fdd3e"},
+]
