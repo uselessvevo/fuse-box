@@ -4,12 +4,16 @@ version = "0.1.0"
 description = "Core fuse-box package"
 authors = ["Ivanov Cyrill <jcommander13@yandex.ru>"]
 license = "MIT"
+packages = [
+    { include = "src" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
 aioify = "^0.4.1"
 python-dateutil = "^2.8.2"
 python-dateutils = "^3.0.2"
+aiohttp = "^3.8.1"
 
 [tool.poetry.dev-dependencies]
 
