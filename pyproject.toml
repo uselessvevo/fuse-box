@@ -4,9 +4,6 @@ version = "0.1.0"
 description = "Core fuse-box package"
 authors = ["Ivanov Cyrill <jcommander13@yandex.ru>"]
 license = "MIT"
-packages = [
-    { include = "src" },
-]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
