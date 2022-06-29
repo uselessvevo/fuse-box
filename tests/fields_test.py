@@ -1,13 +1,13 @@
 import re
 from typing import Union
 
-from handlers.config import INDEX_ALL
-from handlers.handlers import Regex, Mapper
+from fuse_core.handlers.config import INDEX_ALL
+from fuse_core.handlers.handlers import Regex, Mapper
 
-from handlers.fields import Field, DateField
-from handlers.fields import FloatField
-from handlers.fields import ArrayField
-from handlers.fields import IntegerField
+from fuse_core.handlers.fields import Field, DateField
+from fuse_core.handlers.fields import FloatField
+from fuse_core.handlers.fields import ArrayField
+from fuse_core.handlers.fields import IntegerField
 
 
 def clean_digits(value: str) -> Union[str, None]:
