@@ -17,12 +17,13 @@ from .config import DEFAULT_ARRAY_SEPARATORS
 
 from .handlers import IHandler
 from .utils import get_separator
-from .exceptions import ArraySizeLimitError, ValueValidationError
+from .exceptions import ArraySizeLimitError
+from .exceptions import ValueValidationError
+from orm.validators import IValidator
+
 
 __all__ = ('Field', 'StringField', 'IntegerField',
            'FloatField', 'DateField', 'ArrayField',)
-
-from orm.validators import IValidator
 
 
 class Field:

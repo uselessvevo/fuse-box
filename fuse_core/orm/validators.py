@@ -3,8 +3,9 @@ import re
 from typing import Any, Iterable
 
 __all__ = (
+    'EmailValidator',
     'MinLengthValidator',
-    'MaxLengthValidator'
+    'MaxLengthValidator',
 )
 
 
