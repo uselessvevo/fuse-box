@@ -114,7 +114,7 @@ class Field:
                 if self._raise_exception:
                     raise e
 
-            return value
+            self._value = value
 
         except self.exceptions as e:
             if isinstance(self.default, DEFAULT_AS_INPUT):
