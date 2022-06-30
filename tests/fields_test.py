@@ -22,34 +22,34 @@ def main():
     field_regex = Field(
         handlers=[Regex(r'([\w+\.]+)@([\w+\.]+)', index=INDEX_ALL())]
     )
-    field_regex_result = field_regex.set('username@mail.com')
-    print(f'{field_regex_result=}')
+    field_regex.set('username@mail.com')
+    print(f'{field_regex.value=}')
 
     field_mapping = Field(
         handlers=[Mapper({'Yes': True, 'No': False}, 'Not found', True)]
     )
-    field_mapping_result = field_mapping.set('Yes')
-    print(f'{field_mapping_result=}')
+    field_mapping.set('Yes')
+    print(f'{field_mapping.value=}')
 
-    field_mapping_result = field_mapping.set('no')
-    print(f'{field_mapping_result=}')
+    field_mapping.set('no')
+    print(f'{field_mapping.value=}')
 
-    field_mapping_result = field_mapping.set('None value')
-    print(f'{field_mapping_result=}')
+    field_mapping.set('None value')
+    print(f'{field_mapping.value=}')
 
     # Base data Fields
 
     integer_field = IntegerField(method=clean_digits)
-    integer_field_result = integer_field.set('123@@@')
-    print(f'{integer_field_result=}')
+    integer_field.set('123@@@')
+    print(f'{integer_field.value=}')
 
     float_field = FloatField(method=clean_digits)
-    float_field_result = float_field.set('222,00')
-    print(f'{float_field_result=}')
+    float_field.set('222,00')
+    print(f'{float_field.value=}')
 
     float_field = FloatField()
-    float_field_fraction_result = float_field.set('4 3/2')
-    print(f'{float_field_fraction_result=}')
+    float_field.set('4 3/2')
+    print(f'{float_field.value=}')
 
     # Array Field
 
@@ -59,14 +59,14 @@ def main():
         child_field=IntegerField(),
         size=2
     )
-    array_field_result = array_field.set('222,222')
-    print(f'{array_field_result=}')
+    array_field.set('222,222')
+    print(f'{array_field.value=}')
 
     # Date Field
 
     date_field = DateField(as_string=True)
-    date_field_result = date_field.set('2020.04.05')
-    print(f'{date_field_result=}')
+    date_field.set('2020.04.05')
+    print(f'{date_field.value=}')
 
 
 if __name__ == '__main__':
