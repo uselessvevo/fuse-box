@@ -1,4 +1,4 @@
-from core.fields import Field
+from fuse_core.core.fields import Field
 
 
 class Serializer:

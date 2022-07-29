@@ -8,16 +8,16 @@ from typing import Tuple
 from typing import Union
 from typing import Callable
 
-from core.etc import DEFAULT_AS_INPUT
-from core.etc import ARRAY_NO_SIZE_LIMITS
-from core.etc import EUROPEAN_DATE_FORMAT
-from core.etc import DEFAULT_FLOAT_SEPARATORS
-from core.etc import DEFAULT_ARRAY_SEPARATORS
+from fuse_core.core.etc import DEFAULT_AS_INPUT
+from fuse_core.core.etc import ARRAY_NO_SIZE_LIMITS
+from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
+from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
+from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
 
-from core.handlers import IHandler
-from core.utils import get_separator
-from core.exceptions import ArraySizeLimitError
-from core.exceptions import ValueValidationError
+from fuse_core.core.handlers import IHandler
+from fuse_core.core.utils import get_separator
+from fuse_core.core.exceptions import ArraySizeLimitError
+from fuse_core.core.exceptions import ValueValidationError
 from orm.validators import IValidator
 
 

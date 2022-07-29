@@ -2,8 +2,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, List, Union
 
-from core.etc import INDEX_ALL, DEFAULT_REGEX_INDEX
-from core.exceptions import RegexGroupNotFoundError
+from fuse_core.core.etc import INDEX_ALL, DEFAULT_REGEX_INDEX
+from fuse_core.core.exceptions import RegexGroupNotFoundError
 
 
 __all__ = (
