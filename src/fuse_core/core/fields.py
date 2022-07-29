@@ -8,18 +8,17 @@ from typing import Tuple
 from typing import Union
 from typing import Callable
 
-from fuse_core.handlers.config import DEFAULT_AS_INPUT
-from fuse_core.handlers.config import ARRAY_NO_SIZE_LIMITS
-from fuse_core.handlers.config import DATETIME_ATTRIBUTE
-from fuse_core.handlers.config import EUROPEAN_DATE_FORMAT
-from fuse_core.handlers.config import DEFAULT_FLOAT_SEPARATORS
-from fuse_core.handlers.config import DEFAULT_ARRAY_SEPARATORS
+from core.etc import DEFAULT_AS_INPUT
+from core.etc import ARRAY_NO_SIZE_LIMITS
+from core.etc import EUROPEAN_DATE_FORMAT
+from core.etc import DEFAULT_FLOAT_SEPARATORS
+from core.etc import DEFAULT_ARRAY_SEPARATORS
 
-from fuse_core.handlers.handlers import IHandler
-from fuse_core.handlers.utils import get_separator
-from fuse_core.handlers.exceptions import ArraySizeLimitError
-from fuse_core.handlers.exceptions import ValueValidationError
-from fuse_core.orm.validators import IValidator
+from core.handlers import IHandler
+from core.utils import get_separator
+from core.exceptions import ArraySizeLimitError
+from core.exceptions import ValueValidationError
+from orm.validators import IValidator
 
 
 __all__ = ('Field', 'StringField', 'IntegerField',
@@ -75,11 +74,11 @@ class Field:
         # method with only one parameter `value`
         self._method = method
 
-        # List of handlers with initial parameters
+        # List of core with initial parameters
         self._handlers = handlers or tuple()
 
         if self.method and self.handlers:
-            raise AttributeError('using `method` and `handlers` together is not allowed')
+            raise AttributeError('using `method` and `core` together is not allowed')
 
         self._validators = validators or tuple()
 
@@ -176,7 +175,7 @@ class Field:
     def method(self, value):
         self._method = value
 
-    # List of handlers with initial parameters
+    # List of core with initial parameters
     @property
     def handlers(self):
         return self._handlers
@@ -258,7 +257,7 @@ class DateField(Field):
         self.out_date_format = out_date_format
 
         # Attribute from `datetime` object
-        self.date_attribute = date_attribute or DATETIME_ATTRIBUTE
+        self.date_attribute = date_attribute
 
         super().__init__(**kwargs)
 
@@ -268,8 +267,10 @@ class DateField(Field):
         except dateutil.parser.ParserError as e:
             raise e
 
-        new_value = getattr(new_value, self.date_attribute)()
-        if self.as_string:
+        if self.date_attribute:
+            new_value = getattr(new_value, self.date_attribute)()
+
+        if self.as_string and self.out_date_format:
             try:
                 return new_value.strftime(self.out_date_format)
             except (ValueError, OverflowError) as e:

@@ -1,4 +1,4 @@
-from handlers.fields import Field
+from core.fields import Field
 
 
 class Serializer:
