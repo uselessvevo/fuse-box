@@ -18,7 +18,7 @@ from fuse_core.core.handlers import IHandler
 from fuse_core.core.utils import get_separator
 from fuse_core.core.exceptions import ArraySizeLimitError
 from fuse_core.core.exceptions import ValueValidationError
-from orm.validators import IValidator
+from fuse_core.orm.validators import IValidator
 
 
 __all__ = ('Field', 'StringField', 'IntegerField',
