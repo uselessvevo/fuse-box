@@ -1,4 +1,4 @@
-from typing import Any, Union, List
+from typing import Any, List
 from collections import OrderedDict
 
 
@@ -43,9 +43,6 @@ class FuseDictionary:
         return result
 
     def set(self, key: str, value: Any) -> None:
-        """
-        Метод для задания значения поля `value`
-        """
         self.__container[key].value = value
 
     def get(self, key: str, default: Any = None) -> Any:
@@ -57,60 +54,36 @@ class FuseDictionary:
                 return res.value
         raise KeyError(f'Key "{key}" not found')
 
-    def get_values(self, *keys, full_house: bool = False) -> List[Any]:
+    def get_values(self, *keys, attr: str = 'value', full_house: bool = False) -> List[Any]:
         """
-        Метод для получения значений (атрибут - values) по переданным полям
+        Method that returns values (value attr) by given keys
         Args:
-            keys (tuple): наименования (ключи) полей
-            full_house (bool): получить все ключи
+            keys (tuple):
+            attr (str): get needed attribute from `Field` based class
+            full_house (bool): return all keys
         """
-
         keys = keys if not full_house else tuple(self.__container.keys())
         return [self.get(k) for k in keys]
 
-    def get_fields(
-        self,
-        *keys, attr: str = None,
-        raw: bool = False,
-        full_house: bool = False
-    ) -> Union[List[Any]]:
-        """
-        Метод для получения полей (экземпляров)
-        Args:
-            keys (tuple): наименования (ключи) полей
-            attr (str): нужный атрибут поля
-            raw (bool): вернуть объект
-            full_house (bool): получить все ключи
-        """
-
-        keys = keys if not full_house else tuple(self.__container.keys())
-        items = [getattr(self.field(k), attr or 'value', None) if not raw else self.field(k) for k in keys]
-        return [i for i in items if i]
-
     def get_items(
         self,
-        *fields,
-        field_name: str = None,
+        *keys,
+        attr: str = 'value',
         full_house: bool = True
     ) -> dict:
         """
-        Метод для получения словаря.
-        В качестве значений передаётся `slave_attr` (к примеру - `value`)
+        Method that returns dictionary by given keys
         Args:
-            fields (tuple): наименования (ключи) полей
-            field_name (str): нужный атрибут поля
-            full_house (bool): получить все ключи
+            keys (tuple):
+            attr (str): get needed attribute from `Field` based class
+            full_house (bool): return all keys
         """
-
-        if full_house and not fields:
-            fields = self.__container.keys()
-
-        if not field_name:
-            field_name = 'value'
+        if full_house and not keys:
+            keys = self.__container.keys()
 
         return {
-            getattr(self.field(k), 'name', None): getattr(self.field(k), field_name or 'value', None)
-            for k in fields
+            getattr(self.field(k), 'name', None): getattr(self.field(k), attr or 'value', None)
+            for k in keys
         }
 
     @property
