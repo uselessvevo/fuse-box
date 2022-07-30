@@ -263,7 +263,13 @@ class DateField(Field):
 
     def handle(self, value: str) -> datetime:
         try:
-            new_value = dateutil.parser.parse(value, fuzzy=True)
+            if isinstance(value, str):
+                new_value = dateutil.parser.parse(value, fuzzy=True)
+            elif isinstance(value, (int, float)):
+                new_value = datetime.fromtimestamp(value)
+            elif isinstance(value, datetime):
+                new_value = value
+
         except dateutil.parser.ParserError as e:
             raise e
 
