@@ -2,7 +2,7 @@ from fuse_core.core.fields import Field
 
 
 __all__ = (
-    'Serializer'
+    'Serializer',
 )
 
 
