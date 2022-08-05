@@ -8,7 +8,7 @@ from typing import Tuple
 from typing import Union
 from typing import Callable
 
-from fuse_core.core.etc import DEFAULT_AS_INPUT
+from fuse_core.core.etc import DEFAULT_FROM_INPUT
 from fuse_core.core.etc import ARRAY_NO_SIZE_LIMITS
 from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
 from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
@@ -31,7 +31,7 @@ class Field:
     """
 
     __slots__ = (
-        '_value', '_name', '_verbose_name',
+        '_name', '_verbose_name',
         '_null', '_default', '_skip_values',
         '_method', '_handlers', '_validators',
         '_raise_exception'
@@ -50,15 +50,12 @@ class Field:
         verbose_name: str = None,
         null: bool = False,
         skip_values: List[Any] = None,
-        default: Union[Any, DEFAULT_AS_INPUT] = None,
+        default: Union[Any, DEFAULT_FROM_INPUT] = None,
         method: Callable = None,
         handlers: List[IHandler] = None,
         validators: List[IValidator] = None,
         raise_exception: bool = True
     ) -> None:
-        self._raise_exception = raise_exception
-        self._value: Any = None
-
         # Field code name
         self._name = name
 
@@ -77,10 +74,13 @@ class Field:
         # List of core with initial parameters
         self._handlers = handlers or tuple()
 
-        if self.method and self.handlers:
-            raise AttributeError('using `method` and `core` together is not allowed')
+        if self._method and self._handlers:
+            raise AttributeError('using `method` and `handlers` together is not allowed')
 
         self._validators = validators or tuple()
+
+        # Raise exception or not
+        self._raise_exception: bool = raise_exception
 
     def validate(self, value: Any) -> Any:
         """
@@ -98,14 +98,14 @@ class Field:
 
     def set(self, value, *args, **kwargs):
         try:
-            if value in self.skip_values:
+            if value in self._skip_values:
                 raise ValueError(f'Value "{value}" in skip list')
 
-            for handler in self.handlers:
+            for handler in self._handlers:
                 value = handler.handle(value)
 
-            if self.method:
-                value = self.method(value)
+            if self._method:
+                value = self._method(value)
 
             try:
                 value = self.handle(value)
@@ -113,81 +113,38 @@ class Field:
                 if self._raise_exception:
                     raise e
 
-            self._value = value
+            return value
 
         except self.exceptions as e:
-            if isinstance(self.default, DEFAULT_AS_INPUT):
-                self._value = value
+            # To return value as it was passed
+            # then you need to pass `default=DEFAULT_FROM_INPUT()`.
+            # But remember, that result will be unpredictable in some way
+            if isinstance(self.default, DEFAULT_FROM_INPUT):
+                return value
             raise e
-
-    @property
-    def value(self):
-        return self._value
 
     @property
     def name(self):
         return self._name
 
-    @name.setter
-    def name(self, value):
-        self._name = value
-
-    # Verbose name (f.e. we use it in `fuse.sheets`)
     @property
     def verbose_name(self):
+        """ Verbose name (f.e. we use it in `fuse_sheets`) """
         return self._verbose_name
 
-    @verbose_name.setter
-    def verbose_name(self, value):
-        self._verbose_name = value
-
-    # Is value nullable
     @property
     def null(self):
+        """ Is value can be nullable """
         return self._null
-
-    @null.setter
-    def null(self, value):
-        self._null = value
 
     @property
     def default(self):
         return self._default
 
-    @default.setter
-    def default(self, value):
-        self._default = value
-
-    @property
-    def skip_values(self):
-        return self._skip_values
-
-    @skip_values.setter
-    def skip_values(self, value):
-        self._skip_values = value
-
-    # method with only one parameter `value`
-    @property
-    def method(self):
-        return self._method
-
-    @method.setter
-    def method(self, value):
-        self._method = value
-
-    # List of core with initial parameters
-    @property
-    def handlers(self):
-        return self._handlers
-
-    @handlers.setter
-    def handlers(self, value):
-        self._handlers = value
-
     def __repr__(self):
         return f'({self.__class__.__name__}) ' \
                f'<id: {id(self)}, name: {self.name}, ' \
-               f'verbose_name: {self.verbose_name}, value: {self._value}>'
+               f'verbose_name: {self.verbose_name}>'
 
 
 class StringField(Field):
@@ -230,11 +187,11 @@ class FloatField(Field):
         new_value = value
         separator = get_separator(self.separators, value)
 
-        # Check if we've got a separator
+        # Check for separator
         if separator:
             new_value = new_value.replace(separator, '.')
 
-        # Check if value is fraction
+        # Check for fraction
         if '/' in new_value:
             new_value = float(sum(Fraction(s) for s in new_value.split()))
 
