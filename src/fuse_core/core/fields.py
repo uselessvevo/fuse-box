@@ -41,7 +41,9 @@ class Field:
         KeyError,
         ValueError,
         IndexError,
-        OverflowError
+        RuntimeError,
+        OverflowError,
+        MemoryError,
     )
 
     def __init__(
@@ -80,7 +82,7 @@ class Field:
         self._validators = validators or tuple()
 
         # Raise exception or not
-        self._raise_exception: bool = raise_exception
+        self._raise_exception = raise_exception
 
     def validate(self, value: Any) -> Any:
         """
