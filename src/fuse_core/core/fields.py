@@ -74,7 +74,7 @@ class Field:
         self._method = method
 
         # List of core with initial parameters
-        self._handlers = handlers or tuple()
+        self._handlers = handlers
 
         if self._method and self._handlers:
             raise AttributeError('using `method` and `handlers` together is not allowed')
@@ -103,11 +103,15 @@ class Field:
             if value in self._skip_values:
                 raise ValueError(f'Value "{value}" in skip list')
 
-            for handler in self._handlers:
-                value = handler.handle(value)
+            if self._handlers:
+                for handler in self._handlers:
+                    value = handler.handle(value)
 
             if self._method:
                 value = self._method(value)
+
+            if self._validators:
+                self.validate(value)
 
             try:
                 value = self.handle(value)

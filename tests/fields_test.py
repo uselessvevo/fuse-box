@@ -1,6 +1,7 @@
 import re
 from typing import Union
 
+from fuse_core import EmailValidator
 from fuse_core.core.etc import INDEX_ALL
 from fuse_core.core.handlers import Regex, Mapper
 
@@ -22,7 +23,12 @@ def main():
     field_regex = Field(
         handlers=[Regex(r'([\w+\.]+)@([\w+\.]+)', index=INDEX_ALL())]
     )
-    print(f"{field_regex.set('username@mail.com')=}")
+    print(f"{field_regex.set('username1@mail.com')=}")
+
+    email_field = Field(
+        validators=[EmailValidator]
+    )
+    print(f"{email_field.set('username2@mail.ru')=}")
 
     field_mapping = Field(
         handlers=[Mapper({'Yes': True, 'No': False}, 'Not found', True)]

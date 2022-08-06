@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Union
 
 from fuse_core.core.etc import INDEX_ALL, DEFAULT_REGEX_INDEX
-from fuse_core.core.exceptions import RegexGroupNotFoundError
+from fuse_core.core.exceptions import RegexError
 
 
 __all__ = (
@@ -59,7 +59,7 @@ class Regex(IHandler):
         new_value = re.search(self._regex, value)
 
         if not new_value:
-            raise RegexGroupNotFoundError
+            raise RegexError
 
         if isinstance(self._index, int):
             return new_value.group(self._index)

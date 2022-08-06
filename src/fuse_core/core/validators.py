@@ -38,14 +38,19 @@ class MaxLengthValidator(IValidator):
         raise TypeError('value is not iterable')
 
 
-class EmailValidator(IValidator):
+class RegexValidator(IValidator):
+
+    def __init__(self, regex: str) -> None:
+        self._regex = regex
 
     def validate(self, value: Any) -> bool:
-        regex = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
         try:
-            if re.match(regex, value):
+            if re.match(self._regex, value):
                 return True
             return False
 
         except Exception:
-            raise ValueError('can\'t parse email address')
+            raise ValueError('can\'t parse regex')
+
+
+EmailValidator = RegexValidator(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')

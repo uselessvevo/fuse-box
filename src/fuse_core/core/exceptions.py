@@ -6,7 +6,7 @@ Main exceptions
 __all__ = (
     'ArraySizeLimitError',
     'ValueValidationError',
-    'RegexGroupNotFoundError',
+    'RegexError',
 )
 
 
@@ -14,7 +14,7 @@ class ValueValidationError(ValueError):
     pass
 
 
-class RegexGroupNotFoundError(ValueError):
+class RegexError(ValueError):
     pass
 
 

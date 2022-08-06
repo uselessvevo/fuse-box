@@ -3,11 +3,11 @@ from collections import OrderedDict
 
 
 __all__ = (
-    'FuseDictionary',
+    'FieldDictionary',
 )
 
 
-class FuseDictionary:
+class FieldDictionary:
     """
     Контейнер для `Field`
     """
