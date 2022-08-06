@@ -68,7 +68,7 @@ class Field:
         self._null = null
 
         self._default = default
-        self._skip_values = skip_values or tuple()
+        self._skip_values = skip_values
 
         # method with only one parameter `value`
         self._method = method
@@ -100,8 +100,9 @@ class Field:
 
     def set(self, value, *args, **kwargs):
         try:
-            if value in self._skip_values:
-                raise ValueError(f'Value "{value}" in skip list')
+            if self._skip_values:
+                if value in self._skip_values:
+                    raise ValueError(f'Value "{value}" in skip list')
 
             if self._handlers:
                 for handler in self._handlers:
