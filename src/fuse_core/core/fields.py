@@ -79,7 +79,7 @@ class Field:
         if self._method and self._handlers:
             raise AttributeError('using `method` and `handlers` together is not allowed')
 
-        self._validators = validators or tuple()
+        self._validators = validators
 
         # Raise exception or not
         self._raise_exception = raise_exception
