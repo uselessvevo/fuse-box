@@ -1,7 +1,5 @@
 __all__ = (
-    'DEFAULT_ALLOWED_TYPES',
     'DEFAULT_ARRAY_SEPARATORS',
-    'DEFAULT_NONE_VALUES',
     'DEFAULT_FLOAT_SEPARATORS',
     'AMERICAN_DATE_FORMAT',
     'AMERICAN_DATETIME_FORMAT',
@@ -9,41 +7,26 @@ __all__ = (
     'EUROPEAN_DATETIME_FORMAT',
     'DEFAULT_REGEX_INDEX',
     'INDEX_ALL',
-    'ARRAY_NO_SIZE_LIMITS',
-    'READABLE_TYPES_MAPPING',
+    'LIMITLESS_ARRAY',
     'DATE_REGEX'
 )
 
-# Типы данных по-умолчанию (`fields.Field`)
-DEFAULT_ALLOWED_TYPES = (str, int, float,)
-
-# Символ для деления строки (`fields.ArrayField`)
+# Default separators for `ArrayField`
 DEFAULT_ARRAY_SEPARATORS = ('-', '@', '—', ',')
 
-# Нулёвые (ты нулевой) символы по-умолчанию (`fields.Field`)
-DEFAULT_NONE_VALUES = ('-', '', ' ', 'N/AН/П', 'N/A\r\nН/П', None)
+# Default separators for `FloatField`
+DEFAULT_FLOAT_SEPARATORS = (',', '.')
 
-DEFAULT_FLOAT_SEPARATORS = (',',)
-
-# Для возвращения всего массива
+# To get all values from iterable field's result
 INDEX_ALL = type('INDEX_ALL', (), {})
 
-# Индекс для регулярных выражение по-умолчанию
+# Default regex group index for `Regex` handler
 DEFAULT_REGEX_INDEX = 1
 
-# Неограниченный размер массива
-ARRAY_NO_SIZE_LIMITS = type('ARRAY_NO_SIZE_LIMITS', (), {})
+# To disable `ArrayField` size limit
+LIMITLESS_ARRAY = type('ARRAY_NO_SIZE_LIMITS', (), {})
 
-# Типы данных для чтения человеками
-READABLE_TYPES_MAPPING = {
-    int: 'число',
-    float: 'число',
-    str: 'строка',
-    list: 'список',
-    tuple: 'список'
-}
-
-# Даты (европейский, американский)
+# Date regex, formats
 DATE_REGEX = r'(\d+\S+\d+\S+\d+)'
 
 EUROPEAN_DATE_FORMAT = '%d.%m.%Y'

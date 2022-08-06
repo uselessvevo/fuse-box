@@ -3,14 +3,11 @@ from collections import OrderedDict
 
 
 __all__ = (
-    'FieldDictionary',
+    'FieldContainer',
 )
 
 
-class FieldDictionary:
-    """
-    Контейнер для `Field`
-    """
+class FieldContainer:
 
     __slots__ = (
         '__container',
@@ -86,6 +83,5 @@ class FieldDictionary:
             for k in keys
         }
 
-    @property
-    def container(self):
-        return self.__container
+    def __repr__(self):
+        return f'{self.__class__.__name__} <id: {id(self)}>'

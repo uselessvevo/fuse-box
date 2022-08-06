@@ -9,7 +9,7 @@ from typing import Union
 from typing import Callable
 
 from fuse_core.core.etc import DEFAULT_FROM_INPUT
-from fuse_core.core.etc import ARRAY_NO_SIZE_LIMITS
+from fuse_core.core.etc import LIMITLESS_ARRAY
 from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
 from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
 from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
@@ -263,7 +263,7 @@ class ArrayField(Field):
         self, *,
         child_field: Field,
         separators: Tuple[str] = None,
-        size: Union[int, ARRAY_NO_SIZE_LIMITS] = ARRAY_NO_SIZE_LIMITS(),
+        size: Union[int, LIMITLESS_ARRAY] = LIMITLESS_ARRAY(),
         **kwargs
     ) -> None:
 
@@ -285,7 +285,7 @@ class ArrayField(Field):
 
     def _check_array_size(self, value) -> bool:
         """ Check array size, I guess """
-        if isinstance(self.size, ARRAY_NO_SIZE_LIMITS):
+        if isinstance(self.size, LIMITLESS_ARRAY):
             return True
 
         return len(value) >= self.size
