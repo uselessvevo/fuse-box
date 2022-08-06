@@ -17,7 +17,7 @@ from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
 from fuse_core.core.handlers import IHandler
 from fuse_core.core.utils import get_separator
 from fuse_core.core.exceptions import ArraySizeLimitError
-from fuse_core.core.exceptions import ValueValidationError
+from fuse_core.core.exceptions import ValidationError
 from fuse_core.core.validators import IValidator
 
 
@@ -91,7 +91,7 @@ class Field:
         """
         for validator in self._validators:
             if not validator.validate(value):
-                raise ValueValidationError
+                raise ValidationError
 
         return value
 

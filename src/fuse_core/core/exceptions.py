@@ -5,12 +5,12 @@ Main exceptions
 
 __all__ = (
     'ArraySizeLimitError',
-    'ValueValidationError',
+    'ValidationError',
     'RegexError',
 )
 
 
-class ValueValidationError(ValueError):
+class ValidationError(ValueError):
     pass
 
 
