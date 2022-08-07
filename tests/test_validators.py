@@ -8,7 +8,3 @@ def test_validators():
 
     email_field = Field('username2@mail.ru', validators=[EmailValidator])
     print(f"{email_field.value=}")
-
-
-if __name__ == '__main__':
-    test_validators()

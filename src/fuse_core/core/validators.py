@@ -50,7 +50,7 @@ class RangeValidator(IValidator):
         self._max_val = max_val
 
     def validate(self, value: Any) -> bool:
-        return self._min_val >= value <= self._max_val
+        return value in range(self._min_val, self._max_val)
 
 
 class RegexValidator(IValidator):
