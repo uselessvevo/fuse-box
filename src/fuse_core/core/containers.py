@@ -1,5 +1,8 @@
-from typing import Any, List
+import json
+from typing import Any
 from collections import OrderedDict
+
+from fuse_core.core.fields import Field
 
 
 __all__ = (
@@ -16,51 +19,42 @@ class FieldContainer:
     def __init__(self):
         self.__container = OrderedDict({})
 
-    def __setitem__(self, key, value):
-        self.__container[key] = value
+    def __setitem__(self, key, field: Field):
+        if not isinstance(field, Field):
+            raise TypeError('argument field must be `Field` based class')
+        self.__container[key] = field
 
     def __getitem__(self, item):
         return self.__container[item]
 
     def __delitem__(self, key):
-        del self.__container[key]
+        self.__container.pop(key)
+
+    def set(self, key: str, value: Any) -> None:
+        """ Call Field's `set` method """
+        self.__container[key].set(value)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """ Get value from `Field` instance """
+        result = self.get_field(key, 'value', default)
+        if result is None:
+            raise KeyError(f'field "{key}" not found')
+        return result
 
     def pop(self, key, default=None):
         self.__container.pop(key, default)
 
-    def field(
+    def get_field(
         self,
         key: str,
+        attr: str,
         default: Any = None,
-        attr: str = None
-    ) -> List[Any]:
+    ) -> Any:
+        """ Get any available attribute from `Field` class """
         result = self.__container.get(key, default)
-        if result and attr:
-            return getattr(result, attr or 'value', default)
+        if result is not None:
+            return getattr(result, attr, default)
         return result
-
-    def set(self, key: str, value: Any) -> None:
-        self.__container[key].value = value
-
-    def get(self, key: str, default: Any = None) -> Any:
-        res = self.__container.get(key)
-        if res is not None:
-            if res.value is None:
-                return default
-            else:
-                return res.value
-        raise KeyError(f'Key "{key}" not found')
-
-    def get_values(self, *keys, attr: str = 'value', full_house: bool = False) -> List[Any]:
-        """
-        Method that returns values (value attr) by given keys
-        Args:
-            keys (tuple):
-            attr (str): get needed attribute from `Field` based class
-            full_house (bool): return all keys
-        """
-        keys = keys if not full_house else tuple(self.__container.keys())
-        return [self.get(k) for k in keys]
 
     def get_items(
         self,
@@ -69,19 +63,35 @@ class FieldContainer:
         full_house: bool = True
     ) -> dict:
         """
-        Method that returns dictionary by given keys
+        Return dictionary by given keys
         Args:
             keys (tuple):
             attr (str): get needed attribute from `Field` based class
             full_house (bool): return all keys
         """
-        if full_house and not keys:
+        if full_house:
             keys = self.__container.keys()
 
         return {
-            getattr(self.field(k), 'name', None): getattr(self.field(k), attr or 'value', None)
-            for k in keys
+            self.get_field(k, 'name'): self.get_field(k, attr) for k in keys
         }
 
+    def to_json(self, *keys, full_house: bool = True) -> str:
+        """
+        Convert dict to json
+
+        Args:
+            keys (tuple):
+            full_house (bool): return all keys
+        """
+        if full_house:
+            keys = self.__container.keys()
+
+        result = {
+            self.get_field(k, 'name'): self.get_field(k, 'value') for k in keys
+        }
+        return json.dumps(result)
+
     def __repr__(self):
-        return f'{self.__class__.__name__} <id: {id(self)}>'
+        keys = ', '.join(tuple(self.__container.keys())[:3])
+        return f'{self.__class__.__name__} <id: {id(self)}, keys: {keys}... (keys were truncated)>'

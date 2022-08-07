@@ -23,6 +23,15 @@ class IHandler(ABC):
 class Mapper(IHandler):
     """
     Handful mapper (dict/hashmap)
+
+    >>> from fuse_core.core.fields import Field
+    >>> email_field = Field(
+    >>>     value='email@mail.com',
+    >>>     name='email',
+    >>>     handlers=[
+    >>>         Mapper({'Yes': True, 'No': False}, default='Not found', ignore_case=True)
+    >>>     ]
+    >>> )
     """
 
     def __init__(

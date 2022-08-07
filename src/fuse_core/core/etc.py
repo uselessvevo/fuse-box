@@ -11,6 +11,9 @@ __all__ = (
     'DATE_REGEX'
 )
 
+# Default empty value
+EMPTY_VALUE = type('EMPTY_VALUE', (), {})
+
 # Default separators for `ArrayField`
 DEFAULT_ARRAY_SEPARATORS = ('-', '@', '—', ',')
 

@@ -8,11 +8,13 @@ from typing import Tuple
 from typing import Union
 from typing import Callable
 
-from fuse_core.core.etc import DEFAULT_FROM_INPUT
+from fuse_core.core.etc import EMPTY_VALUE
 from fuse_core.core.etc import LIMITLESS_ARRAY
+from fuse_core.core.etc import DEFAULT_FROM_INPUT
 from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
 from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
 from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
+from fuse_core.core.exceptions import HandlerError
 
 from fuse_core.core.handlers import IHandler
 from fuse_core.core.utils import get_separator
@@ -31,7 +33,7 @@ class Field:
     """
 
     __slots__ = (
-        '_name', '_verbose_name',
+        '_value', '_name', '_verbose_name',
         '_null', '_default', '_skip_values',
         '_method', '_handlers', '_validators',
         '_raise_exception'
@@ -47,7 +49,9 @@ class Field:
     )
 
     def __init__(
-        self, *,
+        self,
+        value: Any = EMPTY_VALUE(),
+        *,
         name: str = None,
         verbose_name: str = None,
         null: bool = False,
@@ -58,6 +62,8 @@ class Field:
         validators: List[IValidator] = None,
         raise_exception: bool = True
     ) -> None:
+        self._value = value
+
         # Field code name
         self._name = name
 
@@ -67,10 +73,13 @@ class Field:
         # Is value nullable
         self._null = null
 
+        # Default value. Can be any type or `DEFAULT_FROM_INPUT()`
         self._default = default
+
+        # List of values to skip
         self._skip_values = skip_values
 
-        # method with only one parameter `value`
+        # Method must have only one parameter - `value`
         self._method = method
 
         # List of core with initial parameters
@@ -98,7 +107,19 @@ class Field:
     def handle(self, value: str) -> Any:
         return value
 
-    def set(self, value, *args, **kwargs):
+    def set(self, value: Any = EMPTY_VALUE()) -> Any:
+        """
+        Method `set` validates data by validators, handlers and methods
+        and then parse it via `Field` base objects by calling `handle` method in it
+
+        Args:
+            value (Any): Any value to handle. By default, it's `EMPTY_VALUE`
+            that allows you to set value from `__init__` method
+        """
+        original_value = value
+        if isinstance(value, EMPTY_VALUE):
+            value = self._value
+
         try:
             if self._skip_values:
                 if value in self._skip_values:
@@ -116,19 +137,29 @@ class Field:
 
             try:
                 value = self.handle(value)
-            except Exception as e:
-                if self._raise_exception:
-                    raise e
+            except self.exceptions as e:
+                raise HandlerError(str(e))
 
+            setattr(self, '_value', value)
             return value
 
         except self.exceptions as e:
             # To return value as it was passed
             # then you need to pass `default=DEFAULT_FROM_INPUT()`.
             # But remember, that result will be unpredictable in some way
-            if isinstance(self.default, DEFAULT_FROM_INPUT):
-                return value
+            if not self._raise_exception:
+                if isinstance(self.default, DEFAULT_FROM_INPUT):
+                    setattr(self, '_value', original_value)
+                    return original_value
+
+                setattr(self, '_value', self._default)
+                return self._default
+
             raise e
+
+    @property
+    def value(self):
+        return self._value
 
     @property
     def name(self):
@@ -290,9 +321,14 @@ class ArrayField(Field):
 
         return len(value) >= self.size
 
-    def _convert_values(self, value: List[Any]) -> List[Field]:
+    def _convert_values(self, values: List[Any]) -> List[Field]:
         """ Convert child field values """
-        return [self.child_field.set(v) for v in value]
+        collect = []
+        for value in values:
+            self.child_field.set(value)
+            collect.append(self.child_field.value)
+
+        return collect
 
     def handle(self, value: str) -> Any:
         new_value = self._split_string(value)

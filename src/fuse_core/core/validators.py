@@ -1,11 +1,16 @@
 import abc
 import re
-from typing import Any, Iterable
+from typing import Any
+from collections import Iterable
+
+from fuse_core.core.exceptions import RegexError
+
 
 __all__ = (
     'EmailValidator',
     'MinLengthValidator',
     'MaxLengthValidator',
+    'RangeValidator',
 )
 
 
@@ -22,7 +27,7 @@ class MinLengthValidator(IValidator):
         self._min_length = min_length
 
     def validate(self, value: Iterable) -> bool:
-        if isinstance(value, Iterable):
+        if hasattr(value, '__iter__'):
             return self._min_length > len(value)
         raise TypeError('value is not iterable')
 
@@ -33,9 +38,19 @@ class MaxLengthValidator(IValidator):
         self._max_length = max_length
 
     def validate(self, value: Iterable) -> bool:
-        if isinstance(value, Iterable):
+        if hasattr(value, '__iter__'):
             return self._max_length < len(value)
         raise TypeError('value is not iterable')
+
+
+class RangeValidator(IValidator):
+
+    def __init__(self, min_val: int, max_val: int) -> None:
+        self._min_val = min_val
+        self._max_val = max_val
+
+    def validate(self, value: Any) -> bool:
+        return self._min_val >= value <= self._max_val
 
 
 class RegexValidator(IValidator):
@@ -49,8 +64,8 @@ class RegexValidator(IValidator):
                 return True
             return False
 
-        except Exception:
-            raise ValueError('can\'t parse regex')
+        except RegexError:
+            raise ValueError('can\'t parse given regex')
 
 
 EmailValidator = RegexValidator(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')

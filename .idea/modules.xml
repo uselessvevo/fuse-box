@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/fuse-core.iml" filepath="$PROJECT_DIR$/.idea/fuse-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../fuse-sheets/.idea/fuse-sheets.iml" filepath="$PROJECT_DIR$/../fuse-sheets/.idea/fuse-sheets.iml" />
     </modules>
   </component>
 </project>
