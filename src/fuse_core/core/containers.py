@@ -76,6 +76,14 @@ class FieldContainer:
             self.get_field(k, 'name'): self.get_field(k, attr) for k in keys
         }
 
+    def to_dict(self, *keys, full_house: bool = True) -> dict:
+        if full_house:
+            keys = self.__container.keys()
+
+        return {
+            self.get_field(k, 'name'): self.get_field(k, 'value') for k in keys
+        }
+
     def to_json(self, *keys, full_house: bool = True) -> str:
         """
         Convert dict to json
@@ -84,13 +92,16 @@ class FieldContainer:
             keys (tuple):
             full_house (bool): return all keys
         """
-        if full_house:
-            keys = self.__container.keys()
+        return json.dumps(self.to_dict(*keys, full_house=full_house))
 
-        result = {
-            self.get_field(k, 'name'): self.get_field(k, 'value') for k in keys
-        }
-        return json.dumps(result)
+    def keys(self):
+        return self.__container.keys()
+
+    def values(self):
+        return self.__container.values()
+
+    def items(self):
+        return self.__container.items()
 
     def __repr__(self):
         keys = ', '.join(tuple(self.__container.keys())[:3])
