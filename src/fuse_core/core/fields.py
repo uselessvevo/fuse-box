@@ -121,6 +121,9 @@ class Field:
             value = self._value
 
         try:
+            if self._null and value is None:
+                raise ValueError('Value cant be nullable')
+
             if self._skip_values:
                 if value in self._skip_values:
                     raise ValueError(f'Value "{value}" in skip list')
@@ -195,6 +198,9 @@ class StringField(Field):
     """
 
     def handle(self, value: str) -> Any:
+        if value is None:
+            return
+
         return str(value)
 
 

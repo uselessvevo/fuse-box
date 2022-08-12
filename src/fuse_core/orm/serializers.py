@@ -1,8 +1,7 @@
 from typing import Union
 
 from fuse_core.core.fields import Field
-from fuse_core.core.containers import FieldDictionary
-
+from fuse_core.core.containers import FieldContainer
 
 __all__ = (
     'Serializer',
@@ -15,49 +14,49 @@ class Serializer:
     Inspired by DRF's serializers
 
     Example:
-    >>> from fuse_core.core.fields import *
-    >>> from fuse_core.core.validators import *
-    >>> from fuse_core.orm.serializers import *
+        >>> from fuse_core.core.fields import *
+        >>> from fuse_core.core.validators import *
+        >>> from fuse_core.orm.serializers import *
 
-    >>>    class UserSerializer(Serializer):
-    >>>        id = IntegerField()
-    >>>        email = StringField()
-    >>>        first_name = StringField()
-    >>>        second_name = StringField()
-    >>>        middle_name = StringField()
-    >>>
-    >>>
-    >>>    class UserCreateSerializer(Serializer):
-    >>>        email = StringField(validators=[EmailValidator()])
-    >>>        first_name = StringField(validators=[MinLengthValidator(1)])
-    >>>        second_name = StringField(validators=[MaxLengthValidator(125)])
-    >>>        middle_name = StringField(validators=[MinLengthValidator(1)])
-    >>>        email = StringField(validators=[EmailValidator()])
+        >>>    class UserSerializer(Serializer):
+        >>>        id = IntegerField()
+        >>>        email = StringField()
+        >>>        first_name = StringField()
+        >>>        second_name = StringField()
+        >>>        middle_name = StringField()
+        >>>
+        >>>
+        >>>    class UserCreateSerializer(Serializer):
+        >>>        email = StringField(validators=[EmailValidator()])
+        >>>        first_name = StringField(validators=[MinLengthValidator(1)])
+        >>>        second_name = StringField(validators=[MaxLengthValidator(125)])
+        >>>        middle_name = StringField(validators=[MinLengthValidator(1)])
+        >>>        email = StringField(validators=[EmailValidator()])
 
-    >>> user_info = UserSerializer(query, as_field_dict=True)
-    >>> result = user_info.result(to_dict=True)
-    >>> {
-    >>>     "id": "e935114c-e810-4c83-bee2-2519d48f87e8",
-    >>>     "email": "",
-    >>>     "firstname": "Cyrill",
-    >>>     "patronymic": None,
-    >>>     "username": "cyrill.ivanov.1488",
-    >>>     "lastname": "Ivanov"
-    >>> }
+        >>> user_info = UserSerializer(query, as_field_dict=True)
+        >>> result = user_info.handle(as_dict=True)
+        >>> {
+        >>>     "id": "e935114c-e810-4c83-bee2-2519d48f87e8",
+        >>>     "email": "",
+        >>>     "firstname": "Cyrill",
+        >>>     "patronymic": None,
+        >>>     "username": "cyrill.ivanov.1488",
+        >>>     "lastname": "Ivanov"
+        >>> }
     """
 
-    @classmethod
-    def __new__(cls, *args, **kwargs):
-        cls.prepare_fields()
-        return super().__new__(cls)
-
     def __init__(
-        self,
-        entity,
-        many: bool = False,
-        as_field_dict: bool = False,
-        raise_exception: bool = True
+            self,
+            entity,
+            many: bool = False,
+            as_field_dict: bool = False,
+            raise_exception: bool = True,
+            only: tuple[str, ...] = None,
+            exclude: tuple[str, ...] = None
     ):
+        # Main preparations
+        self._prepare_fields(only, exclude)
+
         # Main attributes
         self._entity = entity
         self._many = many
@@ -68,20 +67,35 @@ class Serializer:
         self._raise_exception = raise_exception
         self._as_field_dict = as_field_dict
 
-    @classmethod
-    def prepare_fields(cls):
+    def _prepare_fields(
+            self,
+            only: tuple[str] = None,
+            exclude: tuple[str] = None
+    ):
+        if only and exclude:
+            raise AttributeError('cant use `only` and `exclude` together')
+
+        class_attrs_dict: dict = self.__class__.__dict__
+
+        if exclude:
+            class_attrs_dict = {k: v for (k, v) in class_attrs_dict.items() if k not in exclude}
+
+        elif only:
+            class_attrs_dict = {k: v for (k, v) in class_attrs_dict.items() if k in only}
+
         fields: list[Field] = []
-        for name, field in cls.__dict__.items():
+        for name, field in class_attrs_dict.items():
             if isinstance(field, Field):
                 if field.name is None:
                     field.name = name
+
                 fields.append(field)
 
-        cls._fields = {f.name: f for f in fields}
+        self._fields = {f.name: f for f in fields}
 
     # Pre-serialization methods
 
-    def get_entity_dict(self, entity) -> dict:
+    def _get_entity_dict(self, entity) -> dict:
         """
         Get dict from entity
 
@@ -102,20 +116,20 @@ class Serializer:
 
         raise ValueError('Entity dict is empty or doesnt contain needed attributes')
 
-    def handle(self, entity, to_dict: bool = False) -> Union[dict, FieldDictionary]:
+    def _handle_entity(self, entity, as_dict: bool = False) -> Union[dict, FieldContainer]:
         """
         Main entrypoint
 
         Arguments:
-            to_dict (bool): convert `FieldDictionary (-s)` to dict
+            as_dict (bool): convert `FieldContainer (-s)` to dict
         """
         try:
             if self._as_field_dict:
-                field_dict = FieldDictionary()
+                field_dict = FieldContainer()
             else:
                 field_dict = {}
 
-            entity_dict = self.get_entity_dict(entity)
+            entity_dict = self._get_entity_dict(entity)
 
             for key, value in entity_dict.items():
                 field: Field = self._fields.get(key)
@@ -126,18 +140,20 @@ class Serializer:
                 else:
                     field_dict[field.name] = field.value
 
-            if to_dict:
-                return field_dict.to_dict(full_house=True)
+            if as_dict and isinstance(field_dict, FieldContainer):
+                return field_dict.as_dict(full_house=True)
+
+            return field_dict
 
         except Exception as e:
             self._is_valid = False
             if self._raise_exception:
                 raise e
 
-    def result(self, **kwargs):
+    def handle(self, **kwargs):
         if self._many:
-            return [self.handle(i, **kwargs) for i in self._entity]
-        return self.handle(self._entity, **kwargs)
+            return [self._handle_entity(i, **kwargs) for i in self._entity]
+        return self._handle_entity(self._entity, **kwargs)
 
     def __repr__(self):
         return f'({self.__class__.__name__}) <id: {id(self)}>'

@@ -14,6 +14,9 @@ __all__ = (
 # Default empty value
 EMPTY_VALUE = type('EMPTY_VALUE', (), {})
 
+# Raw field instance
+RAW_FIELDS = type('RAW_FIELDS', (), {})
+
 # Default separators for `ArrayField`
 DEFAULT_ARRAY_SEPARATORS = ('-', '@', '—', ',')
 

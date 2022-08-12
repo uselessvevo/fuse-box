@@ -2,15 +2,16 @@ import json
 from typing import Any
 from collections import OrderedDict
 
+from fuse_core.core.etc import RAW_FIELDS
 from fuse_core.core.fields import Field
 
 
 __all__ = (
-    'FieldDictionary',
+    'FieldContainer',
 )
 
 
-class FieldDictionary:
+class FieldContainer:
 
     __slots__ = (
         '__container',
@@ -51,10 +52,13 @@ class FieldDictionary:
         default: Any = None,
     ) -> Any:
         """ Get any available attribute from `Field` class """
-        result = self.__container.get(key, default)
-        if result is not None:
-            return getattr(result, attr, default)
-        return result
+        field = self.__container.get(key, default)
+        if field is not None:
+            if isinstance(attr, RAW_FIELDS):
+                return field
+            return getattr(field, attr, default)
+
+        raise AttributeError(f'Field `{key}` not found')
 
     def get_items(
         self,
@@ -76,7 +80,7 @@ class FieldDictionary:
             self.get_field(k, 'name'): self.get_field(k, attr) for k in keys
         }
 
-    def to_dict(self, *keys, full_house: bool = True) -> dict:
+    def as_dict(self, *keys, full_house: bool = True) -> dict:
         if full_house:
             keys = self.__container.keys()
 
@@ -84,14 +88,14 @@ class FieldDictionary:
             self.get_field(k, 'name'): self.get_field(k, 'value') for k in keys
         }
 
-    def to_json(self, *keys, full_house: bool = True) -> str:
+    def as_json(self, *keys, full_house: bool = True) -> str:
         """
         Convert dict to json
         Args:
             keys (tuple):
             full_house (bool): return all keys
         """
-        return json.dumps(self.to_dict(*keys, full_house=full_house))
+        return json.dumps(self.as_dict(*keys, full_house=full_house))
 
     def keys(self):
         return self.__container.keys()
@@ -104,4 +108,4 @@ class FieldDictionary:
 
     def __repr__(self):
         keys = ', '.join(tuple(self.__container.keys())[:3])
-        return f'{self.__class__.__name__} <id: {id(self)}, keys: {keys}... (keys were truncated)>'
+        return f'{self.__class__.__name__} <id: {id(self)}, keys: {keys}... (truncated)>'
