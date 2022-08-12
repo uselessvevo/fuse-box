@@ -1,4 +1,7 @@
+from typing import Union
+
 from fuse_core.core.fields import Field
+from fuse_core.core.containers import FieldDictionary
 
 
 __all__ = (
@@ -28,60 +31,105 @@ class Serializer:
             email = StringField(validators=[EmailValidator()])
 
 
-        async def test_orm_sql(request: web.Request) -> web.Response:
+        def test_orm_sql(request: web.Request) -> web.Response:
             # Let's get info from `User` model
-            users = await User.query.order_by(User.id.desc()).gino.all()
-            results = await UserSerializer(users, many=True).result
+            users = User.query.order_by(User.id.desc()).gino.all()
+            results = UserSerializer(users, many=True).result
             return web.json_response({'results': results})
     """
 
     @classmethod
     def __new__(cls, *args, **kwargs):
-        fields = []
+        cls.prepare_fields()
+        return super().__new__(cls)
+
+    def __init__(
+        self,
+        entity,
+        many: bool = False,
+        as_field_dict: bool = False,
+        raise_exception: bool = True
+    ):
+        # Main attributes
+        self._entity = entity
+        self._many = many
+
+        # Flags
+
+        self._is_valid = None
+        self._raise_exception = raise_exception
+        self._as_field_dict = as_field_dict
+
+    @classmethod
+    def prepare_fields(cls):
+        fields: list[Field] = []
         for name, field in cls.__dict__.items():
             if isinstance(field, Field):
                 if field.name is None:
                     field.name = name
                 fields.append(field)
 
-        cls._fields = fields
-        cls._fields_mapping = {f.name: f for f in fields}
-        return super().__new__(cls)
+        cls._fields = {f.name: f for f in fields}
 
-    def __init__(
-        self,
-        models,
-        many: bool = False
-    ):
-        self._models = models
-        self._many = many
-        self._is_valid = None
+    # Pre-serialization methods
 
-    async def handle(self, raise_exception: bool = True):
-        collect = []
+    def get_entity_dict(self, entity) -> dict:
+        """
+        Get dict from entity
+
+        Args:
+            entity (object):
+        """
+        entity_dict = {}
+        if hasattr(entity, '__values__'):
+            entity_dict = entity.__values__
+
+        elif hasattr(entity, '_sa_instance_state'):
+            entity_dict = entity._sa_instance_state.dict
+
+        entity_dict = {k: v for (k, v) in entity_dict.items() if k in self._fields.keys()}
+
+        if entity_dict:
+            return entity_dict
+
+        raise ValueError('Entity dict is empty or doesnt contain needed attributes')
+
+    def handle(self, entity, to_dict: bool = False) -> Union[dict, FieldDictionary]:
+        """
+        Main entrypoint
+
+        Arguments:
+            to_dict (bool): convert `FieldDictionary (-s)` to dict
+        """
         try:
-            for model in self._models:
-                values = getattr(model, '__values__')
-                if not isinstance(values, dict):
-                    raise ValueError('non-hashmap `__values__` were found')
+            if self._as_field_dict:
+                field_dict = FieldDictionary()
+            else:
+                field_dict = {}
 
-                for key, value in values.items():
-                    if key in self._fields_mapping.keys():
-                        field = self._fields_mapping.get(key)
-                        values[key] = field.validate(value)
+            entity_dict = self.get_entity_dict(entity)
 
-                collect.append(values)
+            for key, value in entity_dict.items():
+                field: Field = self._fields.get(key)
+                field.set(value)
+
+                if self._as_field_dict:
+                    field_dict[field.name] = field
+                else:
+                    field_dict[field.name] = field.value
+
+            if to_dict:
+                return field_dict.to_dict(full_house=True)
 
         except Exception as e:
             self._is_valid = False
-            if raise_exception:
+            if self._raise_exception:
                 raise e
 
-        return collect
-
-    @property
-    async def result(self):
-        return await self.handle()
+    def result(self, **kwargs):
+        if self._many:
+            return [self.handle(i, **kwargs) for i in self._entity]
+        return self.handle(self._entity, **kwargs)
 
     def __repr__(self):
         return f'({self.__class__.__name__}) <id: {id(self)}>'

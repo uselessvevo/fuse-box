@@ -1,10 +1,10 @@
 from fuse_core import EmailValidator
 from fuse_core.core.fields import Field
-from fuse_core.core.containers import FieldContainer
+from fuse_core.core.containers import FieldDictionary
 
 
 def test_container():
-    field_cont = FieldContainer()
+    field_cont = FieldDictionary()
 
     name_field = Field(name='name')
     name_field.set('Name')
@@ -17,7 +17,3 @@ def test_container():
 
     print(f"{field_cont.to_json(full_house=True)=}")
     print(f"{field_cont.get_items(full_house=True)=}")
-
-
-if __name__ == '__main__':
-    test_container()

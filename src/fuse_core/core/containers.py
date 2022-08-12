@@ -6,11 +6,11 @@ from fuse_core.core.fields import Field
 
 
 __all__ = (
-    'FieldContainer',
+    'FieldDictionary',
 )
 
 
-class FieldContainer:
+class FieldDictionary:
 
     __slots__ = (
         '__container',
@@ -87,7 +87,6 @@ class FieldContainer:
     def to_json(self, *keys, full_house: bool = True) -> str:
         """
         Convert dict to json
-
         Args:
             keys (tuple):
             full_house (bool): return all keys
