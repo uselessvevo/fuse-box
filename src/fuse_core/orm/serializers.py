@@ -15,27 +15,35 @@ class Serializer:
     Inspired by DRF's serializers
 
     Example:
-        class UserSerializer(Serializer):
-            id = IntegerField()
-            email = StringField()
-            first_name = StringField()
-            second_name = StringField()
-            middle_name = StringField()
+    >>> from fuse_core.core.fields import *
+    >>> from fuse_core.core.validators import *
+    >>> from fuse_core.orm.serializers import *
 
+    >>>    class UserSerializer(Serializer):
+    >>>        id = IntegerField()
+    >>>        email = StringField()
+    >>>        first_name = StringField()
+    >>>        second_name = StringField()
+    >>>        middle_name = StringField()
+    >>>
+    >>>
+    >>>    class UserCreateSerializer(Serializer):
+    >>>        email = StringField(validators=[EmailValidator()])
+    >>>        first_name = StringField(validators=[MinLengthValidator(1)])
+    >>>        second_name = StringField(validators=[MaxLengthValidator(125)])
+    >>>        middle_name = StringField(validators=[MinLengthValidator(1)])
+    >>>        email = StringField(validators=[EmailValidator()])
 
-        class UserCreateSerializer(Serializer):
-            email = StringField(validators=[EmailValidator()])
-            first_name = StringField(validators=[MinLengthValidator(1)])
-            second_name = StringField(validators=[MaxLengthValidator(125)])
-            middle_name = StringField(validators=[MinLengthValidator(1)])
-            email = StringField(validators=[EmailValidator()])
-
-
-        def test_orm_sql(request: web.Request) -> web.Response:
-            # Let's get info from `User` model
-            users = User.query.order_by(User.id.desc()).gino.all()
-            results = UserSerializer(users, many=True).result
-            return web.json_response({'results': results})
+    >>> user_info = UserSerializer(query, as_field_dict=True)
+    >>> result = user_info.result(to_dict=True)
+    >>> {
+    >>>     "id": "e935114c-e810-4c83-bee2-2519d48f87e8",
+    >>>     "email": "",
+    >>>     "firstname": "Cyrill",
+    >>>     "patronymic": None,
+    >>>     "username": "cyrill.ivanov.1488",
+    >>>     "lastname": "Ivanov"
+    >>> }
     """
 
     @classmethod
