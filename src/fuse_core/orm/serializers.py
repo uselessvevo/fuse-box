@@ -46,13 +46,13 @@ class Serializer:
     """
 
     def __init__(
-            self,
-            entity,
-            many: bool = False,
-            as_field_dict: bool = False,
-            raise_exception: bool = True,
-            only: tuple[str, ...] = None,
-            exclude: tuple[str, ...] = None
+        self,
+        entity,
+        many: bool = False,
+        as_field_dict: bool = False,
+        raise_exception: bool = True,
+        only: tuple[str, ...] = None,
+        exclude: tuple[str, ...] = None
     ):
         # Main preparations
         self._prepare_fields(only, exclude)
@@ -68,9 +68,9 @@ class Serializer:
         self._as_field_dict = as_field_dict
 
     def _prepare_fields(
-            self,
-            only: tuple[str] = None,
-            exclude: tuple[str] = None
+        self,
+        only: tuple[str] = None,
+        exclude: tuple[str] = None
     ):
         if only and exclude:
             raise AttributeError('cant use `only` and `exclude` together')
