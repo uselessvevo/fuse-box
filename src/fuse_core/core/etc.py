@@ -8,7 +8,9 @@ __all__ = (
     'DEFAULT_REGEX_INDEX',
     'INDEX_ALL',
     'LIMITLESS_ARRAY',
-    'DATE_REGEX'
+    'DATE_REGEX',
+    'EMPTY_VALUE',
+    'DEFAULT_FROM_INPUT'
 )
 
 # Default empty value
@@ -16,6 +18,9 @@ EMPTY_VALUE = type('EMPTY_VALUE', (), {})
 
 # Raw field instance
 RAW_FIELDS = type('RAW_FIELDS', (), {})
+
+# Return input value if error occurred
+DEFAULT_FROM_INPUT = type('DEFAULT_AS_INPUT', (), {})
 
 # Default separators for `ArrayField`
 DEFAULT_ARRAY_SEPARATORS = ('-', '@', '—', ',')
@@ -42,4 +47,3 @@ AMERICAN_DATE_FORMAT = '%Y-%m-%d'
 AMERICAN_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 DATETIME_ATTRIBUTE = 'date'
-DEFAULT_FROM_INPUT = type('DEFAULT_AS_INPUT', (), {})

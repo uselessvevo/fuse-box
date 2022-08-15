@@ -16,7 +16,7 @@ __all__ = (
 class IHandler(ABC):
 
     @abstractmethod
-    def handle(self, value, *args, **kwargs) -> Any:
+    def handle(self, value) -> Any:
         pass
 
 
@@ -44,7 +44,7 @@ class Mapper(IHandler):
         self._default = default
         self._ignore_case = ignore_case
 
-    def handle(self, value, *args, **kwargs) -> Any:
+    def handle(self, value) -> Any:
         if self._ignore_case:
             value = value.lower()
             self._mapping = {k.lower(): v for (k, v) in self._mapping.items()}
@@ -64,7 +64,7 @@ class Regex(IHandler):
         self._default = default
         self._index = index
 
-    def handle(self, value, *args, **kwargs) -> Union[str, List[str]]:
+    def handle(self, value) -> Union[str, List[str]]:
         new_value = re.search(self._regex, value)
 
         if not new_value:

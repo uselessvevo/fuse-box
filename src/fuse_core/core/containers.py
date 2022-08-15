@@ -31,34 +31,44 @@ class FieldContainer:
     def __delitem__(self, key):
         self.__container.pop(key)
 
-    def set(self, key: str, value: Any) -> None:
-        """ Call Field's `set` method """
-        self.__container[key].set(value)
-
-    def get(self, key: str, default: Any = None) -> Any:
-        """ Get value from `Field` instance """
-        result = self.get_field(key, 'value', default)
-        if result is None:
-            raise KeyError(f'field "{key}" not found')
-        return result
-
-    def pop(self, key, default=None):
-        self.__container.pop(key, default)
-
     def get_field(
         self,
         key: str,
         attr: str,
         default: Any = None,
     ) -> Any:
-        """ Get any available attribute from `Field` class """
+        """ Get instance or attribute from `Field` """
         field = self.__container.get(key, default)
         if field is not None:
+            # Return `Field` instance
             if isinstance(attr, RAW_FIELDS):
                 return field
+
+            # Return attribute from `Field` instance.
+            # Default is `value`
             return getattr(field, attr, default)
 
         raise AttributeError(f'Field `{key}` not found')
+
+    def set(self, key: str, value: Any) -> None:
+        """ Set value by calling field's `set` method """
+        self.__container[key].set(value)
+
+    def get(
+        self,
+        key: str,
+        attr: str = 'value',
+        default: Any = None
+    ) -> Any:
+        """ Get value from `Field` instance """
+        result = self.get_field(key, attr, default)
+        if result is None:
+            raise KeyError(f'field "{key}" not found')
+        return result
+
+    def pop(self, key, default=None):
+        """ Delete key/field from container """
+        self.__container.pop(key, default)
 
     def get_items(
         self,

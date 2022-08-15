@@ -1,54 +1,19 @@
-from typing import Union
+from typing import Union, Any, Iterable
 
 from fuse_core.core.fields import Field
 from fuse_core.core.containers import FieldContainer
 
+
 __all__ = (
     'Serializer',
+    'ModelSerializer',
 )
 
 
-class Serializer:
-    """
-    Simple SQLAlchemy query serializer.
-    Inspired by DRF's serializers
-
-    Example:
-        >>> from fuse_core.core.fields import *
-        >>> from fuse_core.core.validators import *
-        >>> from fuse_core.orm.serializers import *
-
-        >>>    class UserSerializer(Serializer):
-        >>>        id = IntegerField()
-        >>>        email = StringField()
-        >>>        first_name = StringField()
-        >>>        second_name = StringField()
-        >>>        middle_name = StringField()
-        >>>
-        >>>
-        >>>    class UserCreateSerializer(Serializer):
-        >>>        email = StringField(validators=[EmailValidator()])
-        >>>        first_name = StringField(validators=[MinLengthValidator(1)])
-        >>>        second_name = StringField(validators=[MaxLengthValidator(125)])
-        >>>        middle_name = StringField(validators=[MinLengthValidator(1)])
-        >>>        email = StringField(validators=[EmailValidator()])
-
-        >>> user_info = UserSerializer(query, as_field_dict=True)
-        >>> result = user_info.handle(as_dict=True)
-        >>> {
-        >>>     "id": "e935114c-e810-4c83-bee2-2519d48f87e8",
-        >>>     "email": "",
-        >>>     "firstname": "Cyrill",
-        >>>     "patronymic": None,
-        >>>     "username": "cyrill.ivanov.1488",
-        >>>     "lastname": "Ivanov"
-        >>> }
-    """
+class BaseSerializer:
 
     def __init__(
-        self,
-        entity,
-        many: bool = False,
+        self, *,
         as_field_dict: bool = False,
         raise_exception: bool = True,
         only: tuple[str, ...] = None,
@@ -56,10 +21,6 @@ class Serializer:
     ):
         # Main preparations
         self._prepare_fields(only, exclude)
-
-        # Main attributes
-        self._entity = entity
-        self._many = many
 
         # Flags
 
@@ -93,30 +54,75 @@ class Serializer:
 
         self._fields = {f.name: f for f in fields}
 
+    def __repr__(self):
+        return f'({self.__class__.__name__}) <id: {id(self)}>'
+
+
+class ModelSerializer(BaseSerializer):
+    """
+    Simple SQLAlchemy query serializer.
+    Inspired by DRF's serializers
+
+    Example:
+        >>> from fuse_core.core.fields import *
+        >>> from fuse_core.core.validators import *
+        >>> from fuse_core.orm.serializers import *
+
+        >>>    class UserModelSerializer(ModelSerializer):
+        >>>        class Meta:
+        >>>                model = User
+        >>>                fields = ('id', 'username', 'firstname', 'lastname')
+        >>>
+        >>>
+
+        >>> user_info = UserModelSerializer(session.query(User).first(), as_field_dict=True)
+        >>> result = user_info.handle(as_dict=True)
+        >>> {
+        >>>     "id": "e935114c-e810-4c83-bee2-2519d48f87e8",
+        >>>     "username": "cyrill.ivanov.1337",
+        >>>     "firstname": "Cyrill",
+        >>>     "lastname": "Ivanov"
+        >>> }
+    """
+
+    def __init__(
+        self,
+        model: Union[Iterable[object], object] = None,
+        data: Union[Iterable[dict], dict] = None,
+        many: bool = False,
+        **kwargs,
+    ):
+        self._model = model
+        self._many = many
+        self._data = data
+
+        super().__init__(**kwargs)
+
     # Pre-serialization methods
 
-    def _get_entity_dict(self, entity) -> dict:
+    def _get_model_dict(self, model) -> dict:
         """
-        Get dict from entity
+        Get dict from model
 
         Args:
-            entity (object):
+            model (object):
         """
-        entity_dict = {}
-        if hasattr(entity, '__values__'):
-            entity_dict = entity.__values__
+        model_attr_dict = {}
+        if hasattr(model, '__values__'):
+            model_attr_dict = model.__values__
 
-        elif hasattr(entity, '_sa_instance_state'):
-            entity_dict = entity._sa_instance_state.dict
+        elif hasattr(model, '_sa_instance_state'):
+            model_attr_dict = model._sa_instance_state.dict
 
-        entity_dict = {k: v for (k, v) in entity_dict.items() if k in self._fields.keys()}
+        model_attr_dict = {k: v for (k, v) in model_attr_dict.items() if k in self._fields.keys()}
 
-        if entity_dict:
-            return entity_dict
+        if model_attr_dict:
+            return model_attr_dict
 
-        raise ValueError('Entity dict is empty or doesnt contain needed attributes')
+        raise ValueError('Model attrs dict is empty'
+                         ' or doesnt contain needed attributes')
 
-    def _handle_entity(self, entity, as_dict: bool = False) -> Union[dict, FieldContainer]:
+    def _handle_model(self, model, as_dict: bool = False) -> Union[dict, FieldContainer]:
         """
         Main entrypoint
 
@@ -129,9 +135,9 @@ class Serializer:
             else:
                 field_dict = {}
 
-            entity_dict = self._get_entity_dict(entity)
+            model_attr_dict = self._get_model_dict(model)
 
-            for key, value in entity_dict.items():
+            for key, value in model_attr_dict.items():
                 field: Field = self._fields.get(key)
                 field.set(value)
 
@@ -152,8 +158,71 @@ class Serializer:
 
     def handle(self, **kwargs):
         if self._many:
-            return [self._handle_entity(i, **kwargs) for i in self._entity]
-        return self._handle_entity(self._entity, **kwargs)
+            return [self._handle_model(i, **kwargs) for i in self._model]
+        return self._handle_model(self._model, **kwargs)
 
-    def __repr__(self):
-        return f'({self.__class__.__name__}) <id: {id(self)}>'
+    def create(self):
+        raise NotImplementedError('Method `create` must be implemented')
+
+    def update(self):
+        raise NotImplementedError('Method `update` must be implemented')
+
+
+class Serializer(BaseSerializer):
+
+    def __init__(
+        self, *,
+        data: Union[dict, Iterable[dict]] = None,
+        **kwargs
+    ):
+        self._data = data
+        super().__init__(**kwargs)
+
+    def _handle_data(
+        self,
+        data: Union[Iterable[dict], dict],
+        as_dict: bool = False
+    ) -> Union[dict, FieldContainer]:
+        """
+        Main entrypoint
+
+        Arguments:
+            as_dict (bool): convert `FieldContainer (-s)` to dict
+        """
+        try:
+            if self._as_field_dict:
+                field_dict = FieldContainer()
+            else:
+                field_dict = {}
+
+            for field_name, field_inst in self._fields.items():
+                if field_inst.required and not data.get(field_name):
+                    raise KeyError(f'Input data doesnt contain field {field_name}'
+                                   f' ({field_inst.__class__.__name__})')
+
+            for key, value in data.items():
+                field: Field = self._fields.get(key)
+                if field.required is True and key not in self._fields:
+                    raise KeyError
+
+                field.set(value)
+
+                if self._as_field_dict:
+                    field_dict[field.name] = field
+                else:
+                    field_dict[field.name] = field.value
+
+            if as_dict and isinstance(field_dict, FieldContainer):
+                return field_dict.as_dict(full_house=True)
+
+            return field_dict
+
+        except Exception as e:
+            self._is_valid = False
+            if self._raise_exception:
+                raise e
+
+    def handle(self, **kwargs):
+        if isinstance(self._data, (tuple, list)):
+            return [self._handle_data(i, **kwargs) for i in self._data]
+        return self._handle_data(self._data, **kwargs)

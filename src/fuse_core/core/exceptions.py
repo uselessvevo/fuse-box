@@ -2,13 +2,16 @@
 Main exceptions
 """
 
-
 __all__ = (
     'ArraySizeLimitError',
     'ValidationError',
     'RegexError',
     'HandlerError',
 )
+
+
+class FieldNotReadyError(Exception):
+    """ Raise an error if the method has not been called"""
 
 
 class HandlerError(Exception):

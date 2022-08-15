@@ -14,7 +14,7 @@ from fuse_core.core.etc import DEFAULT_FROM_INPUT
 from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
 from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
 from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
-from fuse_core.core.exceptions import HandlerError
+from fuse_core.core.exceptions import HandlerError, FieldNotReadyError
 
 from fuse_core.core.handlers import IHandler
 from fuse_core.core.utils import get_separator
@@ -36,7 +36,8 @@ class Field:
         '_value', '_name', '_verbose_name',
         '_null', '_default', '_skip_values',
         '_method', '_handlers', '_validators',
-        '_raise_exception'
+        '_raise_exception', '_check_type', '_ready',
+        '_required',
     )
 
     exceptions = (
@@ -50,18 +51,24 @@ class Field:
 
     def __init__(
         self,
-        value: Any = EMPTY_VALUE(),
+        value: Union[Any, EMPTY_VALUE] = EMPTY_VALUE(),
         *,
         name: str = None,
         verbose_name: str = None,
-        null: bool = False,
         skip_values: List[Any] = None,
         default: Union[Any, DEFAULT_FROM_INPUT] = None,
         method: Callable = None,
         handlers: List[IHandler] = None,
         validators: List[IValidator] = None,
-        raise_exception: bool = True
+        null: bool = False,
+        required: bool = False,
+        check_type: bool = False,
+        raise_exception: bool = True,
     ) -> None:
+
+        # Main attributes #
+
+        # Field's value
         self._value = value
 
         # Field code name
@@ -70,80 +77,119 @@ class Field:
         # Verbose name (f.e. we use it in `fuse.sheets`)
         self._verbose_name = verbose_name
 
-        # Is value nullable
-        self._null = null
-
         # Default value. Can be any type or `DEFAULT_FROM_INPUT()`
         self._default = default
 
-        # List of values to skip
+        # List of skippable values
         self._skip_values = skip_values
 
-        # Method must have only one parameter - `value`
+        # Flags #
+
+        # Check if method `set` has not been called
+        self._ready: bool = False
+
+        # Is field required in `orm/serializers.py -> Serializer`
+        self._required = required
+
+        # Is value nullable
+        self._null = null
+
+        # Check input value/data type by `allowed_types`
+        self._check_type = check_type
+
+        # Raise exception or not
+        self._raise_exception = raise_exception
+
+        # Handlers, methods and validators #
+
+        # Method (see tests/test_fields.py)
         self._method = method
 
-        # List of core with initial parameters
+        # List of handlers (see core/handlers.py)
         self._handlers = handlers
 
         if self._method and self._handlers:
             raise AttributeError('using `method` and `handlers` together is not allowed')
 
+        # List of validators (see core/validators.py)
         self._validators = validators
-
-        # Raise exception or not
-        self._raise_exception = raise_exception
 
     def validate(self, value: Any) -> Any:
         """
-        Method that allows you to validate
-        via list of `IValidator` based classes
+        Calls all validators
+
+        Returns:
+              is_valid (bool): is value passed all validators
         """
+        is_valid: bool = False
         for validator in self._validators:
-            if not validator.validate(value):
-                raise ValidationError
+            is_valid = validator.validate(value)
+
+        return is_valid
+
+    def handle(self, value: Any) -> Any:
+        for handler in self._handlers:
+            value = handler.handle(value)
 
         return value
 
-    def handle(self, value: str) -> Any:
+    def process(self, value: Any) -> Any:
         return value
 
     def set(self, value: Any = EMPTY_VALUE()) -> Any:
         """
-        Method `set` validates data by validators, handlers and methods
-        and then parse it via `Field` base objects by calling `handle` method in it
+        Method `set` does everything:
+        * Does basic checks
+        * Calls validators, handlers and method `handle`
+        * Sets final, validated and handled value as field's attribute
 
         Args:
             value (Any): Any value to handle. By default, it's `EMPTY_VALUE`
             that allows you to set value from `__init__` method
         """
         original_value = value
+
         if isinstance(value, EMPTY_VALUE):
             value = self._value
 
         try:
-            if self._null and value is None:
+            # First, check if value can be nullable
+            if not self._null and value is None:
                 raise ValueError('Value cant be nullable')
 
+            # Then check if value in skippables
             if self._skip_values:
                 if value in self._skip_values:
                     raise ValueError(f'Value "{value}" in skip list')
 
+            # Handle by handlers objects
             if self._handlers:
-                for handler in self._handlers:
-                    value = handler.handle(value)
+                value = self.handle(value)
 
+            # Handle by method
             if self._method:
                 value = self._method(value)
 
-            if self._validators:
-                self.validate(value)
-
+            # And now we need to call method `process`
             try:
-                value = self.handle(value)
+                value = self.process(value)
             except self.exceptions as e:
                 raise HandlerError(str(e))
 
-            setattr(self, '_value', value)
+            # Then we need to validate finalized data
+
+            if self._validators:
+                if not self.validate(value):
+                    raise ValidationError
+
+            if self._check_type and hasattr(self, 'allowed_types'):
+                if value in self.allowed_types:
+                    raise TypeError(f'Type `{type(value)}` is not allowed in {self.__class__.__name__}')
+
+            # Final preparations
+
+            self._ready = True
+            self._value = value
             return value
 
         except self.exceptions as e:
@@ -151,18 +197,21 @@ class Field:
             # then you need to pass `default=DEFAULT_FROM_INPUT()`.
             # But remember, that result will be unpredictable in some way
             if not self._raise_exception:
-                if isinstance(self.default, DEFAULT_FROM_INPUT):
-                    setattr(self, '_value', original_value)
+                self._ready = True
+                if isinstance(self._default, DEFAULT_FROM_INPUT):
+                    self._value = value
                     return original_value
 
-                setattr(self, '_value', self._default)
+                self._value = self._default
                 return self._default
 
             raise e
 
     @property
     def value(self):
-        return self._value
+        if self._ready is True:
+            return self._value
+        raise FieldNotReadyError()
 
     @property
     def name(self):
@@ -178,18 +227,15 @@ class Field:
         return self._verbose_name
 
     @property
-    def null(self):
-        """ Is value can be nullable """
-        return self._null
-
-    @property
     def default(self):
         return self._default
 
+    @property
+    def required(self):
+        return self._required
+
     def __repr__(self):
-        return f'({self.__class__.__name__}) ' \
-               f'<id: {id(self)}, name: {self.name}, ' \
-               f'verbose_name: {self.verbose_name}>'
+        return f'{self.__class__.__name__} <id: {id(self)}, name: {self._name}, value: {self._value}>'
 
 
 class StringField(Field):
@@ -197,7 +243,7 @@ class StringField(Field):
     A very simple string field
     """
 
-    def handle(self, value: str) -> Any:
+    def process(self, value: str) -> Any:
         if value is None:
             return
 
@@ -209,7 +255,10 @@ class IntegerField(Field):
     A very simple integer field
     """
 
-    def handle(self, value, *args, **kwargs):
+    def process(self, value, *args, **kwargs):
+        if value is None:
+            return
+
         return int(value)
 
 
@@ -231,7 +280,10 @@ class FloatField(Field):
         self.separators = separators or DEFAULT_FLOAT_SEPARATORS
         super().__init__(**kwargs)
 
-    def handle(self, value: str) -> Any:
+    def process(self, value: str) -> Any:
+        if value is None:
+            return
+
         new_value = value
         separator = get_separator(self.separators, value)
 
@@ -266,7 +318,10 @@ class DateField(Field):
 
         super().__init__(**kwargs)
 
-    def handle(self, value: str) -> datetime:
+    def process(self, value: str) -> datetime:
+        if value is None:
+            return
+
         try:
             if isinstance(value, str):
                 new_value = dateutil.parser.parse(value, fuzzy=True)
@@ -340,7 +395,10 @@ class ArrayField(Field):
 
         return collect
 
-    def handle(self, value: str) -> Any:
+    def process(self, value: str) -> Any:
+        if value is None:
+            return
+
         new_value = self._split_string(value)
 
         if not self._check_array_size(new_value):
