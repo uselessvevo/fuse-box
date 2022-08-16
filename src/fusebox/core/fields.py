@@ -8,19 +8,19 @@ from typing import Tuple
 from typing import Union
 from typing import Callable
 
-from fuse_core.core.etc import EMPTY_VALUE
-from fuse_core.core.etc import LIMITLESS_ARRAY
-from fuse_core.core.etc import DEFAULT_FROM_INPUT
-from fuse_core.core.etc import EUROPEAN_DATE_FORMAT
-from fuse_core.core.etc import DEFAULT_FLOAT_SEPARATORS
-from fuse_core.core.etc import DEFAULT_ARRAY_SEPARATORS
-from fuse_core.core.exceptions import HandlerError, FieldNotReadyError
+from fusebox.core.etc import EMPTY_VALUE
+from fusebox.core.etc import LIMITLESS_ARRAY
+from fusebox.core.etc import DEFAULT_FROM_INPUT
+from fusebox.core.etc import EUROPEAN_DATE_FORMAT
+from fusebox.core.etc import DEFAULT_FLOAT_SEPARATORS
+from fusebox.core.etc import DEFAULT_ARRAY_SEPARATORS
+from fusebox.core.exceptions import HandlerError, FieldNotReadyError
 
-from fuse_core.core.handlers import IHandler
-from fuse_core.core.utils import get_separator
-from fuse_core.core.exceptions import ArraySizeLimitError
-from fuse_core.core.exceptions import ValidationError
-from fuse_core.core.validators import IValidator
+from fusebox.core.handlers import IHandler
+from fusebox.core.utils import get_separator
+from fusebox.core.exceptions import ArraySizeLimitError
+from fusebox.core.exceptions import ValidationError
+from fusebox.core.validators import IValidator
 
 
 __all__ = ('Field', 'StringField', 'IntegerField',

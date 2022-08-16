@@ -1,18 +1,17 @@
 [tool.poetry]
 name = "fuse-core"
-version = "0.1.0"
+version = "2208.16.1"
 description = "Core fuse-box package"
 authors = ["Ivanov Cyrill <jcommander13@yandex.ru>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
-aioify = "^0.4.1"
 python-dateutil = "^2.8.2"
-aiohttp = "^3.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
+sqlalchemy = "latest"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

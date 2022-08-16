@@ -1,5 +1,5 @@
-from fuse_core.core.fields import *
-from fuse_core.core.validators import *
+from fusebox.core.fields import *
+from fusebox.core.validators import *
 
 
 def test_validators():

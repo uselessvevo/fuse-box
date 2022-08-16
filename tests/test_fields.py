@@ -2,14 +2,14 @@ import re
 import datetime
 from typing import Union
 
-from fuse_core import EmailValidator
-from fuse_core.core.etc import INDEX_ALL
-from fuse_core.core.handlers import Regex, Mapper
+from fusebox import EmailValidator
+from fusebox.core.etc import INDEX_ALL
+from fusebox.core.handlers import Regex, Mapper
 
-from fuse_core.core.fields import Field, DateField
-from fuse_core.core.fields import FloatField
-from fuse_core.core.fields import ArrayField
-from fuse_core.core.fields import IntegerField
+from fusebox.core.fields import Field, DateField
+from fusebox.core.fields import FloatField
+from fusebox.core.fields import ArrayField
+from fusebox.core.fields import IntegerField
 
 
 def clean_digits(value: str) -> Union[str, None]:

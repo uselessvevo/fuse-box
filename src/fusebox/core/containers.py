@@ -2,8 +2,8 @@ import json
 from typing import Any
 from collections import OrderedDict
 
-from fuse_core.core.etc import RAW_FIELDS
-from fuse_core.core.fields import Field
+from fusebox.core.etc import RAW_FIELDS
+from fusebox.core.fields import Field
 
 
 __all__ = (

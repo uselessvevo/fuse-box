@@ -2,8 +2,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, List, Union
 
-from fuse_core.core.etc import INDEX_ALL, DEFAULT_REGEX_INDEX
-from fuse_core.core.exceptions import RegexError
+from fusebox.core.etc import INDEX_ALL, DEFAULT_REGEX_INDEX
+from fusebox.core.exceptions import RegexError
 
 
 __all__ = (
@@ -24,7 +24,7 @@ class Mapper(IHandler):
     """
     Handful mapper (dict/hashmap)
 
-    >>> from fuse_core.core.fields import Field
+    >>> from fusebox.core.fields import Field
     >>> email_field = Field(
     >>>     value='email@mail.com',
     >>>     name='email',

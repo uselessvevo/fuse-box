@@ -1,6 +1,6 @@
-from fuse_core.core.fields import *
-from fuse_core.core.validators import *
-from fuse_core.orm.serializers import *
+from fusebox.core.fields import *
+from fusebox.core.validators import *
+from fusebox.orm.serializers import *
 
 
 def test_model_serializer():

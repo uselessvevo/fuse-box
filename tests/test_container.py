@@ -1,6 +1,6 @@
-from fuse_core import EmailValidator
-from fuse_core.core.fields import Field
-from fuse_core.core.containers import FieldContainer
+from fusebox import EmailValidator
+from fusebox.core.fields import Field
+from fusebox.core.containers import FieldContainer
 
 
 def test_container():

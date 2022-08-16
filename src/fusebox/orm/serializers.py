@@ -1,7 +1,7 @@
 from typing import Union, Any, Iterable
 
-from fuse_core.core.fields import Field
-from fuse_core.core.containers import FieldContainer
+from fusebox.core.fields import Field
+from fusebox.core.containers import FieldContainer
 
 
 __all__ = (
@@ -64,9 +64,9 @@ class ModelSerializer(BaseSerializer):
     Inspired by DRF's serializers
 
     Example:
-        >>> from fuse_core.core.fields import *
-        >>> from fuse_core.core.validators import *
-        >>> from fuse_core.orm.serializers import *
+        >>> from fusebox.core.fields import *
+        >>> from fusebox.core.validators import *
+        >>> from fusebox.orm.serializers import *
 
         >>>    class UserModelSerializer(ModelSerializer):
         >>>        class Meta:

@@ -2,7 +2,7 @@ import abc
 import re
 from typing import Any, Iterable
 
-from fuse_core.core.exceptions import RegexError
+from fusebox.core.exceptions import RegexError
 
 
 __all__ = (
