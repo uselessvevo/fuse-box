@@ -6,10 +6,10 @@ from fusebox import EmailValidator
 from fusebox.core.etc import INDEX_ALL
 from fusebox.core.handlers import Regex, Mapper
 
-from fusebox.core.fields import Field, DateField
-from fusebox.core.fields import FloatField
-from fusebox.core.fields import ArrayField
-from fusebox.core.fields import IntegerField
+from fusebox.core.fields import (
+    Field, StringField, IntegerField,
+    FloatField, ArrayField, DateField
+)
 
 
 def clean_digits(value: str) -> Union[str, None]:

@@ -1,16 +1,40 @@
-from fusebox.core.fields import *
+import datetime
+import random
+
+from fusebox.orm.fields import *
 from fusebox.core.validators import *
 from fusebox.orm.serializers import *
 
 
 def test_model_serializer():
+    _sa_instance_dict = {
+        'dict': {
+            'id': random.randrange(1, 20),
+            'age': str(random.randrange(18, 25)),
+            'birth_day': datetime.datetime.now(),
+            'username': f'username{random.randrange(100, 200)}',
+            'email': f'username{random.randrange(100, 200)}@email.com'
+        }
+    }
+
+    class User:
+        """ Pseudo-model """
+        _sa_instance_state = type('_sa_instance_state', (), _sa_instance_dict)
+
     class UserModelSerializer(ModelSerializer):
         class Meta:
-            model = None
-            fields = ('id', 'username')
+            model = User
+            fields = ('id', 'username', 'email', 'username')
+            # ignore_undeclared_fields = True
 
-    user_serializer = UserModelSerializer(...)
-    user_serializer.handle()
+        email = StringField(validators=[EmailValidator])
+        username = StringField()
+
+    user_serializer = UserModelSerializer()
+    try:
+        user_serializer.handle()
+    except RuntimeError:
+        raise RuntimeError
 
 
 def test_serializer():
