@@ -4,7 +4,6 @@ Main exceptions
 
 __all__ = (
     'ArraySizeLimitError',
-    'ValidationError',
     'RegexError',
     'HandlerError',
 )
@@ -21,10 +20,6 @@ class HandlerError(Exception):
 
     def __str__(self):
         return self._message
-
-
-class ValidationError(ValueError):
-    pass
 
 
 class RegexError(ValueError):

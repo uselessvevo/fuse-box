@@ -19,7 +19,6 @@ from fusebox.core.exceptions import HandlerError, FieldNotReadyError
 from fusebox.core.handlers import IHandler
 from fusebox.core.utils import get_separator
 from fusebox.core.exceptions import ArraySizeLimitError
-from fusebox.core.exceptions import ValidationError
 from fusebox.core.validators import IValidator
 
 
@@ -32,15 +31,18 @@ class Field:
     Base field class
     """
 
-    __slots__ = (
+    __new_slots__: list[str] = None
+
+    __slots__: list[str] = [
         '_value', '_name', '_verbose_name',
         '_null', '_default', '_skip_values',
         '_method', '_handlers', '_validators',
         '_raise_exception', '_check_type', '_ready',
-        '_required',
-    )
+    ]
 
-    exceptions = (
+    allowed_types: tuple[Any] = None
+
+    exceptions: tuple[Exception] = (
         KeyError,
         ValueError,
         IndexError,
@@ -48,6 +50,13 @@ class Field:
         OverflowError,
         MemoryError,
     )
+
+    @classmethod
+    def __new__(cls, *args, **kwargs):
+        if isinstance(cls.__new_slots__, (list, tuple)):
+            cls.__slots__.extend(cls.__new_slots__)
+
+        return super().__new__(cls)
 
     def __init__(
         self,
@@ -61,7 +70,6 @@ class Field:
         handlers: List[IHandler] = None,
         validators: List[IValidator] = None,
         null: bool = False,
-        required: bool = False,
         check_type: bool = False,
         raise_exception: bool = True,
     ) -> None:
@@ -87,9 +95,6 @@ class Field:
 
         # Check if method `set` has not been called
         self._ready: bool = False
-
-        # Is field required in `orm/serializers.py -> Serializer`
-        self._required = required
 
         # Is value nullable
         self._null = null
@@ -121,11 +126,11 @@ class Field:
         Returns:
               is_valid (bool): is value passed all validators
         """
-        is_valid: bool = False
         for validator in self._validators:
-            is_valid = validator.validate(value)
-
-        return is_valid
+            try:
+                validator.validate(value)
+            except Exception as e:
+                raise e
 
     def handle(self, value: Any) -> Any:
         for handler in self._handlers:
@@ -179,8 +184,7 @@ class Field:
             # Then we need to validate finalized data
 
             if self._validators:
-                if not self.validate(value):
-                    raise ValidationError
+                self.validate(value)
 
             if self._check_type and hasattr(self, 'allowed_types'):
                 if value in self.allowed_types:
@@ -230,10 +234,6 @@ class Field:
     def default(self):
         return self._default
 
-    @property
-    def required(self):
-        return self._required
-
     def __repr__(self):
         return f'{self.__class__.__name__} <id: {id(self)}, name: {self._name}, value: {self._value}>'
 
@@ -242,8 +242,27 @@ class StringField(Field):
     """
     A very simple string field
     """
+    __new_slots__ = ['_min_length', '_max_length']
 
-    def process(self, value: str) -> Any:
+    def __init__(
+        self, *,
+        min_length: int = None,
+        max_length: int = None,
+        **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self._min_length = min_length
+        self._max_length = max_length
+
+    def process(self, value: str) -> Union[str, None]:
+        if self._min_length:
+            if len(value) < self._min_length:
+                raise ValueError('String length is less then min value')
+
+        if self._max_length:
+            if len(value) > self._max_length:
+                raise ValueError('String length is bigger then max value')
+
         if value is None:
             return
 
@@ -255,7 +274,7 @@ class IntegerField(Field):
     A very simple integer field
     """
 
-    def process(self, value, *args, **kwargs):
+    def process(self, value, *args, **kwargs) -> Union[int, None]:
         if value is None:
             return
 
@@ -268,7 +287,7 @@ class FloatField(Field):
     Supports separators, fractials
     """
 
-    __slots__ = (
+    __new_slots__ = (
         'separators',
     )
 
@@ -280,7 +299,7 @@ class FloatField(Field):
         self.separators = separators or DEFAULT_FLOAT_SEPARATORS
         super().__init__(**kwargs)
 
-    def process(self, value: str) -> Any:
+    def process(self, value: str) -> Union[float, None]:
         if value is None:
             return
 
@@ -318,7 +337,7 @@ class DateField(Field):
 
         super().__init__(**kwargs)
 
-    def process(self, value: str) -> datetime:
+    def process(self, value: str) -> Union[datetime, None]:
         if value is None:
             return
 
@@ -351,7 +370,7 @@ class DateField(Field):
 
 class ArrayField(Field):
 
-    __slots__ = (
+    __new_slots__ = (
         'child_field', 'separators', 'size'
     )
 
