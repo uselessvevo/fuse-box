@@ -6,7 +6,7 @@ authors = ["Ivanov Cyrill <jcommander13@yandex.ru>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
+python = ">=3.7,<3.10"
 python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
