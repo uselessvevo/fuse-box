@@ -1,4 +1,4 @@
-# Fuse core module
+# Fusebox. Useful tools to work with data
 
 This module contains:
 * Fields
