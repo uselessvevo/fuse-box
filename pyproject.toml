@@ -4,6 +4,13 @@ version = "2208.22.2"
 description = "Fusebox. Useful tools to work with data"
 authors = ["Ivanov Cyrill <jcommander13@yandex.ru>"]
 license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
