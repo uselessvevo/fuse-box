@@ -1,7 +1,8 @@
 import abc
 import re
 from typing import Any, Iterable
-from fusebox.orm.exceptions import ValidationError
+from fusebox.core.exceptions import ValidationError
+
 
 __all__ = (
     'EmailValidator',
