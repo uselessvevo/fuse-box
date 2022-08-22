@@ -3,7 +3,7 @@ class ValidationError(ValueError):
     def __init__(
         self,
         message: str = 'Validation error',
-        code_name: str = 'error',
+        code_name: str = 'validation_error',
         detailed_exception: bool = False
     ) -> None:
         self._message = message
