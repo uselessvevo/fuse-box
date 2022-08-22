@@ -1,6 +1,6 @@
 # Fusebox. Useful tools to work with data
 
-This module contains:
+This package contains:
 * Fields
 * Handlers
 * Validators
