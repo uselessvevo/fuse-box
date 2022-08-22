@@ -28,3 +28,15 @@ class RegexError(ValueError):
 
 class ArraySizeLimitError(ValueError):
     pass
+
+
+class NullValueError(ValueError):
+
+    def __str__(self):
+        return 'Value cant be nullable'
+
+
+class SkipValueError(ValueError):
+
+    def __str__(self):
+        return 'Value in skip list'

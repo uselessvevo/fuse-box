@@ -14,7 +14,7 @@ from fusebox.core.etc import DEFAULT_FROM_INPUT
 from fusebox.core.etc import EUROPEAN_DATE_FORMAT
 from fusebox.core.etc import DEFAULT_FLOAT_SEPARATORS
 from fusebox.core.etc import DEFAULT_ARRAY_SEPARATORS
-from fusebox.core.exceptions import HandlerError, FieldNotReadyError
+from fusebox.core.exceptions import HandlerError, FieldNotReadyError, NullValueError, SkipValueError
 
 from fusebox.core.handlers import IHandler
 from fusebox.core.utils import get_separator
@@ -160,12 +160,12 @@ class Field:
         try:
             # First, check if value can be nullable
             if not self._null and value is None:
-                raise ValueError('Value cant be nullable')
+                raise NullValueError
 
             # Then check if value in skippables
             if self._skip_values:
                 if value in self._skip_values:
-                    raise ValueError(f'Value "{value}" in skip list')
+                    raise SkipValueError
 
             # Handle by handlers objects
             if self._handlers:
@@ -203,7 +203,7 @@ class Field:
             if not self._raise_exception:
                 self._ready = True
                 if isinstance(self._default, DEFAULT_FROM_INPUT):
-                    self._value = value
+                    self._value = original_value
                     return original_value
 
                 self._value = self._default
