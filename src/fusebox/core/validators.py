@@ -1,6 +1,8 @@
 import abc
 import re
 from typing import Any, Iterable
+
+from fusebox.core.etc import OPERATORS
 from fusebox.core.exceptions import ValidationError
 
 
@@ -9,6 +11,7 @@ __all__ = (
     'MinLengthValidator',
     'MaxLengthValidator',
     'RangeValidator',
+    'CompareValidator',
 )
 
 
@@ -45,6 +48,16 @@ class MaxLengthValidator(IValidator):
             raise ValidationError('Value is bigger than max length')
 
 
+class CompareValidator(IValidator):
+
+    def __init__(self, value: Any, operator: str) -> None:
+        self._value = value
+        self._operator = OPERATORS.get(operator)
+
+    def validate(self, value: Any):
+        return self._operator(value, self._value)
+
+
 class RangeValidator(IValidator):
 
     def __init__(self, min_val: int, max_val: int) -> None:
@@ -64,7 +77,7 @@ class RegexValidator(IValidator):
     def validate(self, value: Any):
         try:
             if not re.match(self._regex, value):
-                raise ValidationError(f'Cant parse given regular expression with value {value}', 'regex_error')
+                raise ValidationError(f'Cant parse given regular expression with value {value}')
 
         except re.error:
             raise ValidationError('Cant parse given regular expression', 'regex_error')

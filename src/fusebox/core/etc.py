@@ -1,3 +1,6 @@
+import operator
+
+
 __all__ = (
     'DEFAULT_ARRAY_SEPARATORS',
     'DEFAULT_FLOAT_SEPARATORS',
@@ -47,3 +50,12 @@ AMERICAN_DATE_FORMAT = '%Y-%m-%d'
 AMERICAN_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 DATETIME_ATTRIBUTE = 'date'
+
+OPERATORS = {
+    '>': operator.gt,
+    '>=': operator.ge,
+    '<': operator.lt,
+    '=<': operator.le,
+    '=': operator.eq,
+    '!=': operator.ne,
+}
