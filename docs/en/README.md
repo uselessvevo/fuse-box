@@ -1,6 +1,3 @@
-# fuse-box
-
-
 ## Why was the library created?
 
 
@@ -11,4 +8,4 @@ On my previous job, we had to work very often with a lot of extremely poor quali
 
 
 Yes, there are many libraries for **Python** for validation, "cleaning" and loading/unloading data,
-but we wanted to make one package for all the tasks because of its specificity.
+but we wanted to make one lite, minimalistic package for all the tasks because of its specificity.
