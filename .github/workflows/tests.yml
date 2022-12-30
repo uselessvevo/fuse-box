@@ -28,7 +28,5 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions poetry
         poetry install
-    - env:
-        POETRY_VIRTUALENVS_CREATE: false
     - name: Test with tox
       run: python -m tox
