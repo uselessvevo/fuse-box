@@ -6,7 +6,7 @@
 
 [English readme](https://github.com/uselessvevo/fuse-box/tree/main/docs/en) • [Русский readme](https://github.com/uselessvevo/fuse-box/tree/main/docs/ru)
 
-# Fusebox is a minimalistic library for data processing and validation
+# fuse-box - yet another library for processing and validating data
 
 This package contains:
 * Fields
