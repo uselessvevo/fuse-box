@@ -1,5 +1,3 @@
-# Fuse-box - yet another data processing and validating library. 
-
 Why was the library created?
 
 On one of my job, we had to work with a lot of extremely poor quality data:
