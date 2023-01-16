@@ -31,7 +31,7 @@ class Field:
     Base field class
     """
 
-    __new_slots__: list[str] = None
+    __add_slots__: list[str] = None
 
     __slots__: list[str] = [
         '_value', '_name', '_verbose_name',
@@ -53,8 +53,8 @@ class Field:
 
     @classmethod
     def __new__(cls, *args, **kwargs):
-        if isinstance(cls.__new_slots__, (list, tuple)):
-            cls.__slots__.extend(cls.__new_slots__)
+        if isinstance(cls.__add_slots__, (list, tuple)):
+            cls.__slots__.extend(cls.__add_slots__)
 
         return super().__new__(cls)
 
@@ -242,7 +242,7 @@ class StringField(Field):
     """
     A very simple string field
     """
-    __new_slots__ = ['_min_length', '_max_length']
+    __add_slots__ = ['_min_length', '_max_length']
 
     def __init__(
         self, *,
@@ -287,7 +287,7 @@ class FloatField(Field):
     Supports separators, fractials
     """
 
-    __new_slots__ = (
+    __add_slots__ = (
         'separators',
     )
 
@@ -370,7 +370,7 @@ class DateField(Field):
 
 class ArrayField(Field):
 
-    __new_slots__ = (
+    __add_slots__ = (
         'child_field', 'separators', 'size'
     )
 

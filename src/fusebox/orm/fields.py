@@ -12,7 +12,7 @@ __all__ = ('Field', 'StringField', 'IntegerField',
 
 class Field(fields.Field):
 
-    __new_slots__ = ('_required', '_read_only', '_write_only')
+    __add_slots__ = ('_required', '_read_only', '_write_only')
 
     def __init__(
         self, *,
@@ -40,4 +40,3 @@ IntegerField = type('IntegerField', (Field, fields.IntegerField), {})
 FloatField = type('FloatField', (Field, fields.FloatField), {})
 ArrayField = type('ArrayField', (Field, fields.ArrayField), {})
 DateField = type('DateField', (Field, fields.DateField), {})
-
