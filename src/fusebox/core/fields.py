@@ -304,7 +304,7 @@ class FloatField(Field):
             return
 
         new_value = value
-        separator = get_separator(self.separators, value)
+        separator = get_separator(self.separators, new_value)
 
         # Check for separator
         if separator:
