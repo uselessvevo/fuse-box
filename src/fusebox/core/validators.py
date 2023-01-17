@@ -50,11 +50,11 @@ class MaxLengthValidator(IValidator):
 
 class CompareValidator(IValidator):
 
-    def __init__(self, value: Any, *operators: tuple[str]) -> None:
+    def __init__(self, value, *operators) -> None:
         self._value = value
-        self._operator = OPERATORS.get(operator)
+        self._operators = (OPERATORS.get(i) for i in operators)
 
-    def validate(self, value: Any) -> None:
+    def validate(self, value) -> None:
         for operator in self._operators:
             if not operator(value, self._value):
                 raise ValidationError(f"Something went wrong while using f{operator} operator.")
