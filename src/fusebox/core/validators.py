@@ -50,7 +50,8 @@ class MaxLengthValidator(IValidator):
 
 class CompareValidator(IValidator):
 
-    def __init__(self, *operators: tuple[str]) -> None:
+    def __init__(self, value: Any, *operators: tuple[str]) -> None:
+        self._value = value
         self._operator = OPERATORS.get(operator)
 
     def validate(self, value: Any) -> None:
