@@ -187,7 +187,7 @@ class Field:
                 self.validate(value)
 
             if self._check_type and hasattr(self, 'allowed_types'):
-                if value in self.allowed_types:
+                if isinstance(value, self.allowed_types):
                     raise TypeError(f'Type `{type(value)}` is not allowed in {self.__class__.__name__}')
 
             # Final preparations
@@ -304,7 +304,7 @@ class FloatField(Field):
             return
 
         new_value = value
-        separator = get_separator(self.separators, new_value)
+        separator = get_separator(self.separators, value)
 
         # Check for separator
         if separator:
